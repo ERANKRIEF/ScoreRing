@@ -13,7 +13,10 @@ interface Props {
 
 export default function ResultsSummary({ level, details, completed, onRestart }: Props) {
   const { t } = useLang()
-  const ranked = [...completed].sort((a, b) => b.total - a.total)
+  // A dog that did not run is listed but not placed
+  const ran = completed.filter(r => (r.status ?? 'scored') === 'scored')
+  const notRanked = completed.filter(r => (r.status ?? 'scored') !== 'scored')
+  const ranked = [...ran].sort((a, b) => b.total - a.total)
   const levelLabel = ['I', 'II', 'III'][level - 1]
 
   return (
@@ -40,16 +43,17 @@ export default function ResultsSummary({ level, details, completed, onRestart }:
           <span className="rt-score">{t.scoreCol}</span>
         </div>
 
-        {ranked.map((r, idx) => {
+        {[...ranked, ...notRanked].map((r, idx) => {
+          const out = (r.status ?? 'scored') !== 'scored'
           const { key, cls } = qualify(level, r.total)
-          const label = t.qual[key]
-          const isFirst  = idx === 0
-          const rankIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
+          const label = out ? t.statusLabel[r.status!] : t.qual[key]
+          const isFirst  = idx === 0 && !out
+          const rankIcon = out ? '—' : idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
 
           return (
             <div
               key={r.participant.id}
-              className={`results-row${isFirst ? ' results-row--first' : ''}${idx % 2 === 0 ? '' : ' results-row--alt'}`}
+              className={`results-row${isFirst ? ' results-row--first' : ''}${out ? ' results-row--out' : ''}${idx % 2 === 0 ? '' : ' results-row--alt'}`}
             >
               <span className="rt-rank">{rankIcon}</span>
               <span className="rt-start">#{r.participant.startNumber}</span>
@@ -57,8 +61,11 @@ export default function ResultsSummary({ level, details, completed, onRestart }:
                 <span className="rt-handler">{r.participant.handlerName}</span>
                 <span className="rt-dog">{r.participant.dogName}</span>
               </div>
-              <span className={`rt-qual qualifier ${cls}`}>{label}</span>
-              <span className="rt-score-val">{r.total}<span className="rt-max">/{r.max}</span></span>
+              <span className={`rt-qual qualifier ${out ? 'insufficient' : cls}`}>{label}</span>
+              <span className="rt-score-val">
+                {out && r.status === 'absent' ? '—' : r.total}
+                {!(out && r.status === 'absent') && <span className="rt-max">/{r.max}</span>}
+              </span>
             </div>
           )
         })}

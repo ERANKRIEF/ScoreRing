@@ -58,9 +58,13 @@ export interface Participant {
   birthDate?: string
 }
 
+/** A competitor who never ran is not the same as one who scored zero */
+export type ResultStatus = 'scored' | 'absent' | 'eliminated'
+
 export interface CompletedResult {
   participant: Participant
   scores: ScoreMap
   total: number
   max: number
+  status?: ResultStatus
 }

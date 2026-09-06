@@ -2124,3 +2124,46 @@ button {
   a[href]::after { content: ''; }
   @page { margin: 12mm; }
 }
+
+/* ── COMPETITOR EDITING AND STATUS ────────────────────────── */
+.pr-actions { display: flex; gap: 6px; align-items: center; }
+[dir="rtl"] .pr-actions { flex-direction: row-reverse; }
+.pr-edit {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--muted);
+  font-size: 16px;
+}
+.pr-edit:hover { border-color: var(--accent); color: var(--accent); }
+.participant-row.editing { border-inline-start: 3px solid var(--accent); background: rgba(184,245,58,0.06); }
+
+.status-actions { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 12px; }
+.status-btn {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-start;
+  text-align: start;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  font-size: 16px;
+  font-family: inherit;
+}
+.status-btn span { font-size: 12px; color: var(--muted); }
+.status-btn.absent:hover { border-color: var(--muted); }
+.status-btn.eliminated { border-color: rgba(245,58,58,0.4); }
+.status-btn.eliminated:hover { border-color: var(--accent2); color: var(--accent2); }
+[dir="rtl"] .status-btn { font-family: 'Rubik', system-ui, sans-serif; }
+
+.results-row--out { opacity: 0.6; }
+.results-row--out .rt-score-val { color: var(--muted); }
+
+.order-row--slot { border-inline-start-style: dashed; }
+.order-row--slot .order-disc { color: var(--jmp-color); }
+.jump-options--pick { border-bottom: none; padding-bottom: 0; }

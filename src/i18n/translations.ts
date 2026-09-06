@@ -111,6 +111,21 @@ export interface Translations {
   swTargetLabel: string
   swSeconds: (n: number) => string
   swPassed: (n: number) => string
+  saveBtn: string
+  cancelEditBtn: string
+  editBtn: string
+  deleteBtn: string
+  markStatusTitle: (dog: string, handler: string) => string
+  markStatusBody: string
+  markAbsent: string
+  markAbsentHint: string
+  markEliminated: string
+  markEliminatedHint: string
+  statusLabel: Record<string, string>
+  jumpSlotName: string
+  jumpSlotHint: string
+  orderSlotHint: (lvl: string, n: number) => string
+  judgeJumpPick: string
   levelShort: (lvl: string) => string
 
   // Participants
@@ -322,6 +337,21 @@ const en: Translations = {
   swTargetLabel: 'Limit',
   swSeconds: n => `${n}s`,
   swPassed: n => `Past ${n < 60 ? `${n} seconds` : `${n / 60} minutes`}.`,
+  saveBtn: 'Save',
+  cancelEditBtn: 'Cancel edit',
+  editBtn: 'Edit competitor',
+  deleteBtn: 'Remove competitor',
+  markStatusTitle: (dog, handler) => `End the run for ${dog} / ${handler}?`,
+  markStatusBody: 'The competitor moves to the results and judging continues with the next one.',
+  markAbsent: 'Absent',
+  markAbsentHint: 'Never came to the ring — no score',
+  markEliminated: 'Eliminated',
+  markEliminatedHint: 'Sent out mid-trial — keeps the points scored so far',
+  statusLabel: { absent: 'Absent', eliminated: 'Eliminated' },
+  jumpSlotName: 'Jump — handler\'s choice',
+  jumpSlotHint: 'Apparatus chosen at the ring',
+  orderSlotHint: (lvl, n) => `Level ${lvl}: ${n === 1 ? 'one jump is' : `${n} jumps are`} run, and each handler chooses the apparatus for their own dog. Number the slot here; pick the apparatus while judging.`,
+  judgeJumpPick: 'Which jump is this handler running',
   levelShort: lvl => `Level ${lvl}`,
   jumpPerformedLabel: 'Jumping · performed',
   jumpDefaultNote: 'Counting the full height until you record the one the handler chose.',
@@ -773,6 +803,21 @@ const fr: Translations = {
   swTargetLabel: 'Limite',
   swSeconds: n => `${n}s`,
   swPassed: n => `Au-delà de ${n < 60 ? `${n} secondes` : `${n / 60} minutes`}.`,
+  saveBtn: 'Enregistrer',
+  cancelEditBtn: 'Annuler la modification',
+  editBtn: 'Modifier le concurrent',
+  deleteBtn: 'Retirer le concurrent',
+  markStatusTitle: (dog, handler) => `Terminer le passage de ${dog} / ${handler} ?`,
+  markStatusBody: 'Le concurrent passe aux résultats et le jugement continue avec le suivant.',
+  markAbsent: 'Absent',
+  markAbsentHint: 'Ne s\'est pas présenté — aucune note',
+  markEliminated: 'Éliminé',
+  markEliminatedHint: 'Sorti en cours de concours — garde les points acquis',
+  statusLabel: { absent: 'Absent', eliminated: 'Éliminé' },
+  jumpSlotName: 'Saut — au choix du conducteur',
+  jumpSlotHint: 'Agrès choisi sur le terrain',
+  orderSlotHint: (lvl, n) => `Niveau ${lvl} : ${n === 1 ? 'un saut est effectué' : `${n} sauts sont effectués`}, et chaque conducteur choisit l\'agrès pour son chien. Numérotez l\'emplacement ici ; choisissez l\'agrès pendant le jugement.`,
+  judgeJumpPick: 'Quel saut ce conducteur effectue',
   levelShort: lvl => `Niveau ${lvl}`,
   jumpPerformedLabel: 'Saut · effectué',
   jumpDefaultNote: 'La hauteur maximale est comptée tant que celle du conducteur n\'est pas saisie.',
@@ -1224,6 +1269,21 @@ const he: Translations = {
   swTargetLabel: 'מגבלה',
   swSeconds: n => `${n} שנ׳`,
   swPassed: n => `חלפה המגבלה של ${n < 60 ? `${n} שניות` : `${n / 60} דקות`}.`,
+  saveBtn: 'שמירה',
+  cancelEditBtn: 'ביטול עריכה',
+  editBtn: 'עריכת מתחרה',
+  deleteBtn: 'הסרת מתחרה',
+  markStatusTitle: (dog, handler) => `לסיים את המבחן של ${dog} / ${handler}?`,
+  markStatusBody: 'המתחרה עובר לטבלת התוצאות והשיפוט ממשיך למתחרה הבא.',
+  markAbsent: 'נעדר',
+  markAbsentHint: 'לא הגיע לזירה — ללא ניקוד',
+  markEliminated: 'פסול',
+  markEliminatedHint: 'הורחק במהלך המבחן — הנקודות שנצברו נשמרות',
+  statusLabel: { absent: 'נעדר', eliminated: 'פסול' },
+  jumpSlotName: 'קפיצה — לבחירת הנוהג',
+  jumpSlotHint: 'המתקן נבחר בזירה',
+  orderSlotHint: (lvl, n) => `רמה ${lvl}: מבצעים ${n === 1 ? 'קפיצה אחת' : `${n} קפיצות`}, וכל נוהג בוחר בעצמו את המתקן לכלב שלו. כאן קובעים רק את מקומה בסדר; את המתקן בוחרים בזמן השיפוט.`,
+  judgeJumpPick: 'איזו קפיצה מבצע הנוהג הזה',
   levelShort: lvl => `רמה ${lvl}`,
   jumpPerformedLabel: 'קפיצה · מבוצע',
   jumpDefaultNote: 'נספר הגובה המלא עד שתסמן את הגובה שהנוהג בחר.',

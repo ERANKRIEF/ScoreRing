@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import type { Level } from '../types'
-import { getExercises, JUMP_RULE, LEVEL_MAX } from '../data/exercises'
+import { getExercises, JUMP_RULE } from '../data/exercises'
 import { useLang } from '../i18n/LangContext'
 
 export const FIXED_LAST_ID = 'searchescort'
+/** The handler picks the apparatus at the ring, so the order holds a slot for it */
+export const JUMP_SLOT = '__jump__'
 
 interface Props {
   level: Level
@@ -23,39 +25,31 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
   const optionalIds = orderable.filter(e => rule.choose.includes(e.id)).map(e => e.id)
   const chooseJumps = quota > 0 && optionalIds.length > quota
 
-  const isOptional = (id: string) => chooseJumps && optionalIds.includes(id)
-  const firstOptIdx = orderable.findIndex(e => isOptional(e.id))
-  const fixedBefore = firstOptIdx < 0 ? orderable.length : orderable.slice(0, firstOptIdx).filter(e => !isOptional(e.id)).length
-  // Running numbers held for the picked jumps, e.g. [7] at Level I, [9] at Level II
-  const jumpSlots = Array.from({ length: quota }, (_, i) => fixedBefore + 1 + i)
+  // Rows to number: the choosable jumps collapse into one slot per pick, because
+  // which apparatus runs is a decision each handler makes for their own dog.
+  type Row = { id: string; name: string; discipline: string; slot: boolean }
+  const rows: Row[] = []
+  orderable.forEach(e => {
+    if (!chooseJumps || !optionalIds.includes(e.id)) {
+      rows.push({ id: e.id, name: t.exNames[e.id] || e.name, discipline: e.discipline, slot: false })
+      return
+    }
+    if (rows.some(r => r.slot)) return
+    for (let i = 0; i < quota; i++) {
+      rows.push({ id: `${JUMP_SLOT}${i}`, name: t.jumpSlotName, discipline: 'jmp', slot: true })
+    }
+  })
 
   function defaults() {
     const nums: Record<string, string> = {}
-    let n = 1
-    let reserved = false
-    orderable.forEach(e => {
-      if (isOptional(e.id)) {
-        if (!reserved) { n += quota; reserved = true }
-        nums[e.id] = ''
-        return
-      }
-      nums[e.id] = String(n++)
-    })
+    rows.forEach((r, i) => { nums[r.id] = String(i + 1) })
     return nums
   }
 
   const [nums, setNums] = useState<Record<string, string>>(defaults)
-  const [picked, setPicked] = useState<string[]>([])
   const [error, setError] = useState('')
 
   const levelLabel = ['I', 'II', 'III'][level - 1]
-
-  // Highest score the chosen jumps allow. Jump heights carry different points,
-  // so some combinations cannot reach the level's maximum.
-  const achievable = all
-    .filter(e => !isOptional(e.id) || picked.includes(e.id))
-    .reduce((sum, e) => sum + e.maxPts[level], 0)
-  const levelMax = LEVEL_MAX[level]
 
   /**
    * Type a number into an exercise and it takes that slot; whichever exercise
@@ -70,14 +64,14 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
       if (isNaN(n)) return next
 
       const others = Object.keys(prev).filter(
-        k => k !== id && parseInt(prev[k], 10) === n && isActive(k),
+        k => k !== id && parseInt(prev[k], 10) === n,
       )
       if (!others.length) return next
 
       const vacated = parseInt(prev[id], 10)
       const taken = new Set(
         Object.keys(next)
-          .filter(k => !others.includes(k) && isActive(k))
+          .filter(k => !others.includes(k))
           .map(k => parseInt(next[k], 10))
           .filter(x => !isNaN(x)),
       )
@@ -91,38 +85,10 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
     })
   }
 
-  function isActive(id: string) {
-    return orderable.some(e => e.id === id) && (!isOptional(id) || picked.includes(id))
-  }
-
-  /** Tap a jump to include it in the trial; over quota, the earliest pick drops out. */
-  function toggleJump(id: string) {
-    setError('')
-    setPicked(prev => {
-      if (prev.includes(id)) {
-        setNums(n => ({ ...n, [id]: '' }))
-        return prev.filter(j => j !== id)
-      }
-      const next = [...prev, id]
-      const dropped = next.length > quota ? next.shift() : undefined
-      setNums(n => {
-        const out = { ...n }
-        if (dropped) out[dropped] = ''
-        const used = new Set(next.map(j => out[j]).filter(Boolean))
-        out[id] = String(jumpSlots.find(s => !used.has(String(s))) ?? jumpSlots[0])
-        return out
-      })
-      return next
-    })
-  }
-
   function confirm() {
-    if (chooseJumps && picked.length !== quota) { setError(t.errOrderJumps(quota)); return }
+    if (rows.some(r => nums[r.id].trim() === '')) { setError(t.errOrderMissing); return }
 
-    const active = orderable.filter(e => isActive(e.id))
-    if (active.some(e => nums[e.id].trim() === '')) { setError(t.errOrderMissing); return }
-
-    const parsed = active.map(e => ({ id: e.id, n: parseInt(nums[e.id], 10) }))
+    const parsed = rows.map(r => ({ id: r.slot ? JUMP_SLOT : r.id, n: parseInt(nums[r.id], 10) }))
     if (parsed.some(p => isNaN(p.n) || p.n < 1)) { setError(t.errOrderMissing); return }
 
     const seen = new Set<number>()
@@ -146,55 +112,33 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
       </div>
 
       <p className="order-hint">{t.orderHint}</p>
-      {chooseJumps && <p className="order-hint order-hint--jumps">{t.orderJumpsHint(levelLabel, quota)}</p>}
-      {chooseJumps && picked.length === quota && achievable < levelMax && (
-        <p className="order-hint order-hint--short">{t.orderMaxNote(achievable, levelMax)}</p>
-      )}
+      {chooseJumps && <p className="order-hint order-hint--jumps">{t.orderSlotHint(levelLabel, quota)}</p>}
       {error && <div className="add-error order-error" role="alert">{error}</div>}
 
       <div className="order-list">
-        {orderable.map(ex => {
-          const opt = isOptional(ex.id)
-          const on = !opt || picked.includes(ex.id)
-          const name = t.exNames[ex.id] || ex.name
-          return (
-            <div key={ex.id} className={`order-row disc-${ex.discipline}${on ? '' : ' order-row--excluded'}`}>
-              {opt ? (
-                <button
-                  className={`jump-pick${on ? ' on' : ''}`}
-                  onClick={() => toggleJump(ex.id)}
-                  aria-pressed={on}
-                >
-                  {on ? '✓' : '+'}
-                </button>
-              ) : null}
-              <input
-                type="number"
-                inputMode="numeric"
-                min="1"
-                max={orderable.length}
-                value={nums[ex.id]}
-                disabled={!on}
-                onChange={e => setNum(ex.id, e.target.value)}
-                onFocus={e => e.target.select()}
-                aria-label={name}
-              />
-              <div className="order-info">
-                <span className="order-name">{name}</span>
-                <span className="order-disc">
-                  {on
-                    ? opt ? t.jumpPerformedLabel : t.disc[ex.discipline]
-                    : t.notPerformedLabel}
-                </span>
-              </div>
+        {rows.map(row => (
+          <div key={row.id} className={`order-row disc-${row.discipline}${row.slot ? ' order-row--slot' : ''}`}>
+            <input
+              type="number"
+              inputMode="numeric"
+              min="1"
+              max={rows.length}
+              value={nums[row.id]}
+              onChange={e => setNum(row.id, e.target.value)}
+              onFocus={e => e.target.select()}
+              aria-label={row.name}
+            />
+            <div className="order-info">
+              <span className="order-name">{row.name}</span>
+              <span className="order-disc">
+                {row.slot ? t.jumpSlotHint : t.disc[row.discipline]}
+              </span>
             </div>
-          )
-        })}
+          </div>
+        ))}
         {fixedLast && (
           <div className={`order-row order-row--fixed disc-${fixedLast.discipline}`}>
-            <div className="order-fixed-num">
-              {orderable.length - (chooseJumps ? optionalIds.length - quota : 0) + 1}
-            </div>
+            <div className="order-fixed-num">{rows.length + 1}</div>
             <div className="order-info">
               <span className="order-name">{t.exNames[fixedLast.id] || fixedLast.name}</span>
               <span className="order-disc">{t.orderFixedLast}</span>
@@ -206,7 +150,7 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
       <div className="participants-footer">
         <button
           className="part-back-btn"
-          onClick={() => { setNums(defaults()); setPicked([]); setError('') }}
+          onClick={() => { setNums(defaults()); setError('') }}
         >
           {t.orderResetBtn}
         </button>

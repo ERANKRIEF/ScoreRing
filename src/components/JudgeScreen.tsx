@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import type { Level, Penalty } from '../types'
+import type { Level, Penalty, ResultStatus } from '../types'
 import type { useScoring } from '../hooks/useScoring'
 import { useLang } from '../i18n/LangContext'
 import { useWakeLock } from '../hooks/useWakeLock'
@@ -16,6 +16,11 @@ interface Props extends ScoringHook {
   competitorIndex: number
   totalCompetitors: number
   onShowSheet: () => void
+  onMarkStatus: (status: ResultStatus) => void
+  /** Apparatus this handler may choose between, and the one currently in the running order */
+  jumpAlternatives: string[]
+  jumpChoice: string
+  onJumpChoice: (id: string) => void
 }
 
 export default function JudgeScreen(props: Props) {
@@ -26,7 +31,8 @@ export default function JudgeScreen(props: Props) {
     getExerciseState, getExerciseMax, getTotals,
     goToDisc, navigateEx,
     handlerName, dogName, startNumber,
-    competitorIndex, totalCompetitors, onShowSheet,
+    competitorIndex, totalCompetitors, onShowSheet, onMarkStatus,
+    jumpAlternatives, jumpChoice, onJumpChoice,
   } = props
 
   const { t, td } = useLang()
@@ -34,6 +40,7 @@ export default function JudgeScreen(props: Props) {
   const [modalExId, setModalExId] = useState<string | null>(null)
   const [confirmPen, setConfirmPen] = useState<Penalty | null>(null)
   const [showWatch, setShowWatch] = useState(false)
+  const [confirmStatus, setConfirmStatus] = useState<ResultStatus | null>(null)
 
   useWakeLock(true)
   const totalRef = useRef<HTMLDivElement>(null)
@@ -109,6 +116,13 @@ export default function JudgeScreen(props: Props) {
             <div className="score-max">/ {max} pts</div>
           </div>
           <button
+            className="watch-btn"
+            onClick={() => setConfirmStatus('absent')}
+            aria-label={t.markAbsent}
+          >
+            ⃠
+          </button>
+          <button
             className={`watch-btn${showWatch ? ' on' : ''}`}
             onClick={() => setShowWatch(v => !v)}
             aria-label={t.swTitle}
@@ -158,7 +172,24 @@ export default function JudgeScreen(props: Props) {
 
       {showWatch && <Stopwatch onClose={() => setShowWatch(false)} />}
 
-      {/* ── Jump height ── */}
+      {/* ── Which jump, then how high ── */}
+      {jumpOpts && jumpAlternatives.length > 1 && ex.id === jumpChoice && (
+        <div className="jump-options jump-options--pick">
+          <div className="jump-options-label">{t.judgeJumpPick}</div>
+          <div className="jump-chips">
+            {jumpAlternatives.map(id => (
+              <button
+                key={id}
+                className={`jump-chip${id === jumpChoice ? ' active' : ''}`}
+                onClick={() => onJumpChoice(id)}
+              >
+                {t.exNames[id] || id}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {jumpOpts && (
         <div className="jump-options">
           <div className="jump-options-label">{t.jumpHeightLabel}</div>
@@ -256,6 +287,29 @@ export default function JudgeScreen(props: Props) {
             </>
         }
       </div>
+
+      {/* ── Absent or eliminated ends this competitor's run ── */}
+      {confirmStatus && (
+        <div className="modal-overlay open" onClick={() => setConfirmStatus(null)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">{t.markStatusTitle(dogName, handlerName)}</div>
+            <div className="modal-desc">{t.markStatusBody}</div>
+            <div className="status-actions">
+              <button className="status-btn absent" onClick={() => onMarkStatus('absent')}>
+                {t.markAbsent}
+                <span>{t.markAbsentHint}</span>
+              </button>
+              <button className="status-btn eliminated" onClick={() => onMarkStatus('eliminated')}>
+                {t.markEliminated}
+                <span>{t.markEliminatedHint}</span>
+              </button>
+            </div>
+            <button className="modal-cancel-btn" onClick={() => setConfirmStatus(null)}>
+              {t.confirmCancel}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Losing the exercise needs confirming ── */}
       {confirmPen && (

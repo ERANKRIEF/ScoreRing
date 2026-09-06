@@ -19,6 +19,8 @@ export interface TrialSave {
   order: string[]
   currentIdx: number
   completed: CompletedResult[]
+  /** Which apparatus the competitor being judged is running */
+  jumpChoice?: string
   scores: ScoreMap
 }
 

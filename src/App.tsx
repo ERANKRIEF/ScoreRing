@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
-import type { Level, Participant, CompletedResult } from './types'
+import type { Level, Participant, CompletedResult, ResultStatus } from './types'
 import { useScoring } from './hooks/useScoring'
+import { JUMP_RULE } from './data/exercises'
 import { loadTrial, saveTrial, clearTrial, type TrialDetails } from './data/session'
 import { LangProvider } from './i18n/LangContext'
 import SetupScreen       from './components/SetupScreen'
 import ParticipantsScreen from './components/ParticipantsScreen'
-import ExerciseOrderScreen from './components/ExerciseOrderScreen'
+import ExerciseOrderScreen, { JUMP_SLOT } from './components/ExerciseOrderScreen'
 import PracticeScreen from './components/PracticeScreen'
 import QuizScreen from './components/QuizScreen'
 import JudgeScreen       from './components/JudgeScreen'
@@ -24,6 +25,7 @@ function AppInner() {
   const [exerciseOrder, setExerciseOrder] = useState<string[]>([])
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completed, setCompleted]   = useState<CompletedResult[]>([])
+  const [jumpChoice, setJumpChoice] = useState('')
   const [resumable, setResumable]   = useState(() => loadTrial())
 
   const scoring = useScoring()
@@ -42,9 +44,10 @@ function AppInner() {
       order: exerciseOrder,
       currentIdx,
       completed,
+      jumpChoice,
       scores: scoring.scores,
     })
-  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, scoring.scores])
+  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, jumpChoice, scoring.scores])
 
   function resume() {
     const save = resumable
@@ -55,7 +58,9 @@ function AppInner() {
     setExerciseOrder(save.order)
     setCurrentIdx(save.currentIdx)
     setCompleted(save.completed)
-    scoring.restoreSession(save.level, save.order, save.scores)
+    const choice = save.jumpChoice || defaultJump(save.level)
+    setJumpChoice(choice)
+    scoring.restoreSession(save.level, runOrder(save.order, choice), save.scores)
     setResumable(null)
     setScreen(save.screen)
   }
@@ -63,6 +68,19 @@ function AppInner() {
   function discardSaved() {
     clearTrial()
     setResumable(null)
+  }
+
+  /** Each handler picks their own apparatus, so the slot is filled per competitor */
+  function defaultJump(lvl: Level) { return JUMP_RULE[lvl].choose[0] ?? '' }
+  function runOrder(order: string[], choice: string) {
+    return order.flatMap(id => (id === JUMP_SLOT ? (choice ? [choice] : []) : [id]))
+  }
+
+  function changeJump(choice: string) {
+    const order = runOrder(exerciseOrder, choice)
+    setJumpChoice(choice)
+    // Stay on the jump the judge is standing at, not back at the first exercise
+    scoring.restoreSession(level!, order, scoring.scores, order.indexOf(choice))
   }
 
   // ── Setup → Participants ──────────────────────────────────
@@ -79,10 +97,12 @@ function AppInner() {
 
   // ── Exercise order → Judge (first competitor) ─────────────
   function handleOrderConfirmed(order: string[]) {
+    const choice = defaultJump(level!)
     setExerciseOrder(order)
+    setJumpChoice(choice)
     setCurrentIdx(0)
     setCompleted([])
-    scoring.startSession(level!, order)
+    scoring.startSession(level!, runOrder(order, choice))
     setScreen('judge')
   }
 
@@ -90,14 +110,16 @@ function AppInner() {
   function handleBackToJudge() { setScreen('judge') }
 
   // ── Sheet → Next competitor (or results) ──────────────────
-  function handleNextCompetitor() {
+  function handleNextCompetitor(status: ResultStatus = 'scored') {
     const current = participants[currentIdx]
     const { total, max } = scoring.getTotals()
     const snapshot: CompletedResult = {
       participant: current,
       scores: { ...scoring.scores },
-      total,
+      // A dog that never ran has no score to report
+      total: status === 'absent' ? 0 : total,
       max,
+      status,
     }
     setCompleted(prev => {
       const existing = prev.findIndex(r => r.participant.id === current.id)
@@ -113,8 +135,10 @@ function AppInner() {
     if (nextIdx >= participants.length) {
       setScreen('results')
     } else {
+      const choice = defaultJump(level!)
       setCurrentIdx(nextIdx)
-      scoring.startSession(level!, exerciseOrder)
+      setJumpChoice(choice)
+      scoring.startSession(level!, runOrder(exerciseOrder, choice))
       setScreen('judge')
     }
   }
@@ -201,7 +225,7 @@ function AppInner() {
         competitorIndex={currentIdx}
         totalCompetitors={participants.length}
         onBack={handleBackToJudge}
-        onNext={handleNextCompetitor}
+        onNext={() => handleNextCompetitor('scored')}
       />
     )
   }
@@ -216,6 +240,10 @@ function AppInner() {
       competitorIndex={currentIdx}
       totalCompetitors={participants.length}
       onShowSheet={handleShowSheet}
+      onMarkStatus={status => handleNextCompetitor(status)}
+      jumpAlternatives={JUMP_RULE[scoring.level].choose}
+      jumpChoice={jumpChoice}
+      onJumpChoice={changeJump}
     />
   )
 }

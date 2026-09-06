@@ -23,6 +23,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
   const [dog, setDog] = useState('')
   const [extras, setExtras] = useState<Record<ExtraKey, string>>(emptyExtras)
   const [showExtras, setShowExtras] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const levelLabel = ['I', 'II', 'III'][level - 1]
@@ -44,7 +45,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
       setError(t.errValidStartNum)
       return
     }
-    if (participants.some(p => p.startNumber === num)) {
+    if (participants.some(p => p.startNumber === num && p.id !== editingId)) {
       setError(t.errStartNumUsed(num))
       return
     }
@@ -60,23 +61,46 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
     const filledExtras = Object.fromEntries(
       EXTRA_FIELDS.map(k => [k, extras[k].trim()]).filter(([, v]) => v),
     )
-    const newParticipant: Participant = {
-      id: makeId(),
+    const entry: Participant = {
+      id: editingId ?? makeId(),
       startNumber: num,
       handlerName: handler.trim(),
       dogName: dog.trim(),
       ...filledExtras,
     }
-    const updated = [...participants, newParticipant].sort((a, b) => a.startNumber - b.startNumber)
+    const updated = (editingId
+      ? participants.map(p => (p.id === editingId ? entry : p))
+      : [...participants, entry]
+    ).sort((a, b) => a.startNumber - b.startNumber)
+
     setParticipants(updated)
+    clearForm()
     setStartNum(nextStartNumber(updated))
+  }
+
+  function clearForm() {
+    setEditingId(null)
     setHandler('')
     setDog('')
     setExtras(emptyExtras())
   }
 
+  /** Load a competitor back into the form rather than making the judge retype it */
+  function editParticipant(p: Participant) {
+    setEditingId(p.id)
+    setStartNum(String(p.startNumber))
+    setHandler(p.handlerName)
+    setDog(p.dogName)
+    const filled = emptyExtras()
+    EXTRA_FIELDS.forEach(k => { filled[k] = (p[k] as string) ?? '' })
+    setExtras(filled)
+    if (EXTRA_FIELDS.some(k => p[k])) setShowExtras(true)
+    setError('')
+  }
+
   function removeParticipant(id: string) {
     setParticipants(prev => prev.filter(p => p.id !== id))
+    if (editingId === id) clearForm()
   }
 
   function handleSubmit(e: React.FormEvent) {
@@ -143,8 +167,16 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
               onChange={e => setDog(e.target.value)}
             />
           </div>
-          <button type="submit" className="add-btn">{t.addBtn}</button>
+          <button type="submit" className="add-btn">
+            {editingId ? t.saveBtn : t.addBtn}
+          </button>
         </div>
+
+        {editingId && (
+          <button type="button" className="details-toggle" onClick={clearForm}>
+            ✕ {t.cancelEditBtn}
+          </button>
+        )}
 
         <button
           type="button"
@@ -187,7 +219,10 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
             <span></span>
           </div>
           {participants.map((p, idx) => (
-            <div key={p.id} className={`participant-row${idx % 2 === 0 ? '' : ' alt'}`}>
+            <div
+              key={p.id}
+              className={`participant-row${idx % 2 === 0 ? '' : ' alt'}${p.id === editingId ? ' editing' : ''}`}
+            >
               <div className="pr-num">{p.startNumber}</div>
               <div className="pr-info">
                 <span className="pr-handler">{p.handlerName}</span>
@@ -196,7 +231,10 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
                   {p.breed ? ` · ${p.breed}` : ''}
                 </span>
               </div>
-              <button className="pr-delete" onClick={() => removeParticipant(p.id)}>✕</button>
+              <div className="pr-actions">
+                <button className="pr-edit" onClick={() => editParticipant(p)} aria-label={t.editBtn}>✎</button>
+                <button className="pr-delete" onClick={() => removeParticipant(p.id)} aria-label={t.deleteBtn}>✕</button>
+              </div>
             </div>
           ))}
         </div>
