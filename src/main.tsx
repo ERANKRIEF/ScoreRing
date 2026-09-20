@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.tsx'
+import { startPwa } from './pwa'
 
 function showErrorBanner(message: string) {
   let el = document.querySelector<HTMLDivElement>('.app-error-banner')
@@ -21,6 +22,8 @@ window.addEventListener('unhandledrejection', e => {
   const r = e.reason
   showErrorBanner(r instanceof Error ? `${r.message}\n${r.stack ?? ''}` : String(r))
 })
+
+startPwa()
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

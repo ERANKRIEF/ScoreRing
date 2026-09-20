@@ -1,15 +1,26 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import { version } from './package.json'
+
+/** Served next to the app so a running copy can ask which build is live */
+const versionJson: Plugin = {
+  name: 'scorering-version-json',
+  apply: 'build',
+  generateBundle() {
+    this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ version }) })
+  },
+}
 
 export default defineConfig({
   base: process.env.VITE_BASE_PATH ?? '/',
   define: { __APP_VERSION__: JSON.stringify(version) },
   plugins: [
     react(),
+    versionJson,
     VitePWA({
       registerType: 'autoUpdate',
+      injectRegister: false,
       includeAssets: ['icons/*.png', 'icons/*.svg'],
       manifest: {
         name: 'Mondioring – ScoreRing app',
@@ -27,6 +38,7 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globIgnores: ['version.json'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
