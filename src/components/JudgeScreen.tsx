@@ -45,6 +45,7 @@ export default function JudgeScreen(props: Props) {
   useWakeLock(true)
   const totalRef = useRef<HTMLDivElement>(null)
 
+  const isLastEx = currentExIndex === exercises.length - 1
   const ex = exercises[currentExIndex]
   if (!ex) return null
 
@@ -161,14 +162,23 @@ export default function JudgeScreen(props: Props) {
             {ex.note ?? (maxPts > 0 ? t.maxPtsMeta(maxPts) : t.notScoredMeta)}
           </div>
         </div>
-        <button
-          className="ex-nav-btn"
-          onClick={() => navigateEx(1)}
-          disabled={currentExIndex === exercises.length - 1}
-        >
-          {t.nextBtn}
-        </button>
+        {isLastEx ? (
+          <button className="ex-nav-btn ex-nav-btn--finish" onClick={onShowSheet}>
+            {t.toSheetBtn}
+          </button>
+        ) : (
+          <button className="ex-nav-btn" onClick={() => navigateEx(1)}>
+            {t.nextBtn}
+          </button>
+        )}
       </div>
+
+      {isLastEx && (
+        <button className="finish-dog-banner" onClick={onShowSheet}>
+          <span>{t.toSheetHint}</span>
+          <strong>{t.scoresheetBtn} →</strong>
+        </button>
+      )}
 
       {showWatch && <Stopwatch onClose={() => setShowWatch(false)} />}
 

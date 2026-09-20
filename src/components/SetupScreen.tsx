@@ -26,7 +26,7 @@ export default function SetupScreen(props: Props) {
   const { details, onDetailsChange, resumable, onResume, onDiscardSaved, onNext, onPractice, onQuiz } = props
   const { t, lang, setLang } = useLang()
   const [level, setLevel] = useState<Level | null>(null)
-  const [showDetails, setShowDetails] = useState(false)
+  const [showDetails, setShowDetails] = useState(true)
 
   function withLevel(run: (l: Level) => void) {
     if (!level) { alert(t.alertSelectLevel); return }

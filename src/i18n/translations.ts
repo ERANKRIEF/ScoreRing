@@ -96,6 +96,10 @@ export interface Translations {
   detailJudge: string
   detailDecoys: string
   extraFieldsTitle: string
+  detailsStepTitle: (dog: string) => string
+  detailsStepHint: string
+  detailsSkipBtn: string
+  detailsSaveBtn: string
   extraFields: Record<string, string>
   printBtn: string
   competitorCounter: (pos: number, total: number) => string
@@ -216,6 +220,8 @@ export interface Translations {
   dqLabel: string
   nextCompetitorBtn: (pos: number, total: number) => string
   finishTrialBtn: string
+  toSheetBtn: string
+  toSheetHint: string
 
   // Results
   trialResults: string
@@ -340,6 +346,10 @@ const en: Translations = {
   detailJudge: 'Judge',
   detailDecoys: 'Decoys',
   extraFieldsTitle: 'More about the dog (optional)',
+  detailsStepTitle: dog => `Details for ${dog} — for the scoresheet`,
+  detailsStepHint: 'Everything here is optional. Skip and fill it in later with the ✎ button.',
+  detailsSkipBtn: 'Skip',
+  detailsSaveBtn: 'Save details',
   extraFields: {
     breed: 'Breed', birthDate: 'Date of birth', chip: 'Chip',
     pedigree: 'Pedigree no.', scorebook: 'Scorebook no.', catalog: 'Catalogue no.',
@@ -461,6 +471,8 @@ const en: Translations = {
   dqLabel: '⚠ DQ:',
   nextCompetitorBtn: (pos, total) => `Next Competitor (${pos}/${total}) →`,
   finishTrialBtn: 'Finish Trial →',
+  toSheetBtn: 'Scoresheet →',
+  toSheetHint: 'Last exercise. Open the scoresheet to review and finish this dog.',
 
   trialResults: 'Trial',
   trialResultsSpan: 'Results',
@@ -826,6 +838,10 @@ const fr: Translations = {
   detailJudge: 'Juge',
   detailDecoys: 'Hommes d\'attaque',
   extraFieldsTitle: 'En savoir plus sur le chien (facultatif)',
+  detailsStepTitle: dog => `Détails de ${dog} — pour la feuille de notes`,
+  detailsStepHint: 'Tout est facultatif. Passez et complétez plus tard avec le bouton ✎.',
+  detailsSkipBtn: 'Passer',
+  detailsSaveBtn: 'Enregistrer les détails',
   extraFields: {
     breed: 'Race', birthDate: 'Date de naissance', chip: 'Puce',
     pedigree: 'N° de pedigree', scorebook: 'N° de carnet', catalog: 'N° de catalogue',
@@ -947,6 +963,8 @@ const fr: Translations = {
   dqLabel: '⚠ ÉLIM. :',
   nextCompetitorBtn: (pos, total) => `Concurrent suivant (${pos}/${total}) →`,
   finishTrialBtn: 'Terminer le Concours →',
+  toSheetBtn: 'Feuille →',
+  toSheetHint: 'Dernier exercice. Ouvrez la feuille de notes pour vérifier et clôturer ce chien.',
 
   trialResults: 'Résultats',
   trialResultsSpan: 'du Concours',
@@ -1312,6 +1330,10 @@ const he: Translations = {
   detailJudge: 'שופט',
   detailDecoys: 'דיקויים',
   extraFieldsTitle: 'פרטים נוספים על הכלב (רשות)',
+  detailsStepTitle: dog => `פרטי ${dog} — לדף השיפוט`,
+  detailsStepHint: 'הכל רשות. אפשר לדלג ולהשלים אחר כך דרך כפתור ✎ ברשימה.',
+  detailsSkipBtn: 'דלג',
+  detailsSaveBtn: 'שמור פרטים',
   extraFields: {
     breed: 'גזע', birthDate: 'תאריך לידה', chip: 'מספר שבב',
     pedigree: 'מספר סגיר', scorebook: 'מספר פנקס עבודה', catalog: 'מספר קטלוגי',
@@ -1431,8 +1453,10 @@ const he: Translations = {
   finalResult: 'תוצאה סופית',
   outOfPts: max => `מתוך ${max} נק׳`,
   dqLabel: '⚠ פסול:',
-  nextCompetitorBtn: (pos, total) => `מתחר הבא (${pos}/${total})`,
-  finishTrialBtn: 'סיום תחרות',
+  nextCompetitorBtn: (pos, total) => `סיום הכלב ← מתחרה הבא (${pos}/${total})`,
+  finishTrialBtn: 'סיום הכלב ← סיום תחרות',
+  toSheetBtn: 'לגיליון',
+  toSheetHint: 'זה התרגיל האחרון. לסיום הכלב עבור לגיליון הניקוד ולחץ שם על "מתחר הבא" או "סיום תחרות".',
 
   trialResults: 'תוצאות',
   trialResultsSpan: 'התחרות',

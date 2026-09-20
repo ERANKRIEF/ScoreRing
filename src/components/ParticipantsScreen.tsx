@@ -22,7 +22,9 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
   const [handler, setHandler] = useState('')
   const [dog, setDog] = useState('')
   const [extras, setExtras] = useState<Record<ExtraKey, string>>(emptyExtras)
+  // After name and handler, the sheet's paperwork is offered as its own step
   const [showExtras, setShowExtras] = useState(false)
+  const [detailsStep, setDetailsStep] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
@@ -39,7 +41,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
     return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
   }
 
-  function addParticipant() {
+  function validBasics() {
     const num = parseInt(startNum, 10)
     if (!startNum || isNaN(num) || num < 1) {
       setError(t.errValidStartNum)
@@ -58,6 +60,20 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
       return
     }
     setError('')
+    return num
+  }
+
+  /** First press checks the names and opens the details step; the step then adds */
+  function submitBasics() {
+    const num = validBasics()
+    if (num === undefined) return
+    if (editingId || detailsStep) { addParticipant(); return }
+    setDetailsStep(true)
+  }
+
+  function addParticipant() {
+    const num = validBasics()
+    if (num === undefined) return
     const filledExtras = Object.fromEntries(
       EXTRA_FIELDS.map(k => [k, extras[k].trim()]).filter(([, v]) => v),
     )
@@ -80,6 +96,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
 
   function clearForm() {
     setEditingId(null)
+    setDetailsStep(false)
     setHandler('')
     setDog('')
     setExtras(emptyExtras())
@@ -94,7 +111,8 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
     const filled = emptyExtras()
     EXTRA_FIELDS.forEach(k => { filled[k] = (p[k] as string) ?? '' })
     setExtras(filled)
-    if (EXTRA_FIELDS.some(k => p[k])) setShowExtras(true)
+    setShowExtras(true)
+    setDetailsStep(false)
     setError('')
   }
 
@@ -105,7 +123,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    addParticipant()
+    submitBasics()
   }
 
   function handleStart() {
@@ -167,9 +185,11 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
               onChange={e => setDog(e.target.value)}
             />
           </div>
-          <button type="submit" className="add-btn">
-            {editingId ? t.saveBtn : t.addBtn}
-          </button>
+          {!detailsStep && (
+            <button type="submit" className="add-btn">
+              {editingId ? t.saveBtn : t.addBtn}
+            </button>
+          )}
         </div>
 
         {editingId && (
@@ -178,16 +198,25 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
           </button>
         )}
 
-        <button
-          type="button"
-          className="details-toggle"
-          onClick={() => setShowExtras(v => !v)}
-          aria-expanded={showExtras}
-        >
-          {showExtras ? '▾' : '▸'} {t.extraFieldsTitle}
-        </button>
+        {!detailsStep && (
+          <button
+            type="button"
+            className="details-toggle"
+            onClick={() => setShowExtras(v => !v)}
+            aria-expanded={showExtras}
+          >
+            {showExtras ? '▾' : '▸'} {t.extraFieldsTitle}
+          </button>
+        )}
 
-        {showExtras && (
+        {detailsStep && (
+          <div className="details-step-head">
+            <strong>{t.detailsStepTitle(dog.trim())}</strong>
+            <span>{t.detailsStepHint}</span>
+          </div>
+        )}
+
+        {(showExtras || detailsStep) && (
           <div className="details-grid">
             {EXTRA_FIELDS.map(k => (
               <div className="field-group" key={k}>
@@ -214,6 +243,17 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {detailsStep && (
+          <div className="details-step-actions">
+            <button type="button" className="part-back-btn" onClick={() => { setExtras(emptyExtras()); addParticipant() }}>
+              {t.detailsSkipBtn}
+            </button>
+            <button type="button" className="add-btn" onClick={addParticipant}>
+              {t.detailsSaveBtn}
+            </button>
           </div>
         )}
         {error && <div className="add-error" role="alert">{error}</div>}

@@ -19,10 +19,14 @@ type Screen = 'setup' | 'participants' | 'order' | 'practice' | 'quiz' | 'judge'
 
 const SCORED: Screen[] = ['judge', 'sheet', 'results', 'report']
 
+/** The sheet's date is the trial day, so it starts as today and stays editable */
+const today = () => new Date().toISOString().slice(0, 10)
+const freshDetails = (): TrialDetails => ({ date: today() })
+
 function AppInner() {
   const [screen, setScreen]         = useState<Screen>('setup')
   const [level, setLevel]           = useState<Level | null>(null)
-  const [details, setDetails]       = useState<TrialDetails>({})
+  const [details, setDetails]       = useState<TrialDetails>(freshDetails)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [exerciseOrder, setExerciseOrder] = useState<string[]>([])
   const [currentIdx, setCurrentIdx] = useState(0)
@@ -59,7 +63,7 @@ function AppInner() {
     const save = resumable
     if (!save) return
     setLevel(save.level)
-    setDetails(save.details ?? {})
+    setDetails({ ...freshDetails(), ...(save.details ?? {}) })
     setParticipants(save.participants)
     setExerciseOrder(save.order)
     setCurrentIdx(save.currentIdx)
@@ -193,7 +197,7 @@ function AppInner() {
     clearTrial()
     setScreen('setup')
     setLevel(null)
-    setDetails({})
+    setDetails(freshDetails())
     setParticipants([])
     setExerciseOrder([])
     setCurrentIdx(0)
