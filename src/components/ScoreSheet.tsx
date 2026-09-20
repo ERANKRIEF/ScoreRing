@@ -16,6 +16,9 @@ interface Props extends ScoringHook {
   totalCompetitors: number
   onBack: () => void
   onNext: () => void
+  remarks: string
+  onRemarksChange: (v: string) => void
+  onReport: () => void
 }
 
 export default function ScoreSheet(props: Props) {
@@ -23,7 +26,7 @@ export default function ScoreSheet(props: Props) {
     exercises, level, getExerciseState, getExerciseMax,
     participant, details,
     competitorIndex, totalCompetitors,
-    onBack, onNext,
+    onBack, onNext, remarks, onRemarksChange, onReport,
   } = props
 
   const { handlerName, dogName, startNumber } = participant
@@ -143,6 +146,19 @@ export default function ScoreSheet(props: Props) {
         })}
 
         <GrandTotal level={level} total={grandTotal} max={grandMax} disqNames={disqNames} />
+
+        <div className="field-group sheet-remarks">
+          <label htmlFor="remarks">{t.remarksLabel}</label>
+          <textarea
+            id="remarks"
+            rows={3}
+            placeholder={t.remarksPlaceholder}
+            value={remarks}
+            onChange={e => onRemarksChange(e.target.value)}
+          />
+        </div>
+
+        <button className="practice-btn report-btn" onClick={onReport}>{t.reportBtn}</button>
 
         <button className="next-competitor-btn" onClick={onNext}>
           {isLast ? t.finishTrialBtn : t.nextCompetitorBtn(position + 1, totalCompetitors)}

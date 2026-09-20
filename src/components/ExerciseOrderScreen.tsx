@@ -106,7 +106,7 @@ export default function ExerciseOrderScreen({ level, onConfirm, onBack }: Props)
       <div className="participants-header">
         <button className="part-back-btn" onClick={onBack}>{t.back}</button>
         <div className="participants-title">
-          <h1>FCI <span>Mondioring</span></h1>
+          <h1>Mondioring <span>ScoreRing</span></h1>
           <p>{t.orderTitle(levelLabel)}</p>
         </div>
       </div>

@@ -9,9 +9,10 @@ interface Props {
   details: TrialDetails
   completed: CompletedResult[]
   onRestart: () => void
+  onReport: () => void
 }
 
-export default function ResultsSummary({ level, details, completed, onRestart }: Props) {
+export default function ResultsSummary({ level, details, completed, onRestart, onReport }: Props) {
   const { t } = useLang()
   // A dog that did not run is listed but not placed
   const ran = completed.filter(r => (r.status ?? 'scored') === 'scored')
@@ -27,6 +28,7 @@ export default function ResultsSummary({ level, details, completed, onRestart }:
           <p className="results-subtitle">{t.resultsSubtitle(levelLabel, completed.length)}</p>
         </div>
         <div className="sheet-header-actions">
+          <button className="new-trial-btn" onClick={onReport}>{t.reportAllBtn}</button>
           <button className="new-trial-btn" onClick={() => window.print()}>{t.printBtn}</button>
           <button className="new-trial-btn" onClick={onRestart}>{t.newTrialBtn}</button>
         </div>

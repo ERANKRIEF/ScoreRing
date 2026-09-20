@@ -2167,3 +2167,22 @@ button {
 .order-row--slot { border-inline-start-style: dashed; }
 .order-row--slot .order-disc { color: var(--jmp-color); }
 .jump-options--pick { border-bottom: none; padding-bottom: 0; }
+
+/* ── REMARKS & REPORT ─────────────────────────────────────── */
+.sheet-remarks { padding: 0 20px 14px; }
+.sheet-remarks textarea {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  outline: none;
+  resize: vertical;
+}
+.sheet-remarks textarea:focus { border-color: var(--accent); }
+[dir="rtl"] .sheet-remarks textarea { text-align: right; font-family: 'Rubik', system-ui, sans-serif; }
+.report-btn { margin: 0 20px 14px; width: calc(100% - 40px); border-color: var(--gold); color: var(--gold); }
+@media print { .sheet-remarks, .report-btn { display: none !important; } }

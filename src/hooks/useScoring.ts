@@ -49,9 +49,13 @@ export function useScoring() {
     const exs = getExercises(lvl)
       .filter(e => rank.has(e.id))
       .sort((a, b) => rank.get(a.id)! - rank.get(b.id)!)
+    // Keep only what this run contains: an apparatus swapped out mid-run must not
+    // linger in the map, or it would be counted on the printed sheet
+    const kept: ScoreMap = {}
+    exs.forEach(e => { if (saved[e.id]) kept[e.id] = saved[e.id] })
     setLevel(lvl)
     setExercises(exs)
-    setScores({ ...makeInitialScores(exs), ...saved })
+    setScores({ ...makeInitialScores(exs), ...kept })
     setCurrentExIndex(Math.min(exIndex, Math.max(0, exs.length - 1)))
   }, [])
 

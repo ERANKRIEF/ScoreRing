@@ -56,6 +56,8 @@ export interface Participant {
   scorebook?: string
   catalog?: string
   birthDate?: string
+  sex?: string
+  phone?: string
 }
 
 /** A competitor who never ran is not the same as one who scored zero */
@@ -67,4 +69,8 @@ export interface CompletedResult {
   total: number
   max: number
   status?: ResultStatus
+  /** The judge's free-text remarks for the printed sheet */
+  remarks?: string
+  /** Which apparatus this dog took where the handler had a choice */
+  jumpChoice?: string
 }

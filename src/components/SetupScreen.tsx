@@ -3,6 +3,7 @@ import type { Level } from '../types'
 import type { TrialDetails, TrialSave } from '../data/session'
 import { useLang } from '../i18n/LangContext'
 import type { Lang } from '../i18n/translations'
+import SignaturePad from './SignaturePad'
 
 interface Props {
   details: TrialDetails
@@ -51,7 +52,7 @@ export default function SetupScreen(props: Props) {
       </div>
 
       <div className="setup-logo">
-        <h1>FCI <span>Mondioring</span></h1>
+        <h1>Mondioring <span>ScoreRing</span></h1>
         <p>{t.appTagline}</p>
       </div>
 
@@ -102,6 +103,7 @@ export default function SetupScreen(props: Props) {
           <div className="details-grid">
             {([
               ['date', t.detailDate, 'date'],
+              ['organization', t.detailOrganization, 'text'],
               ['location', t.detailLocation, 'text'],
               ['club', t.detailClub, 'text'],
               ['judge', t.detailJudge, 'text'],
@@ -117,6 +119,16 @@ export default function SetupScreen(props: Props) {
                 />
               </div>
             ))}
+            <SignaturePad
+              label={t.sigJudge}
+              value={details.judgeSignature}
+              onChange={v => onDetailsChange({ ...details, judgeSignature: v })}
+            />
+            <SignaturePad
+              label={t.sigDecoys}
+              value={details.decoysSignature}
+              onChange={v => onDetailsChange({ ...details, decoysSignature: v })}
+            />
           </div>
         )}
 

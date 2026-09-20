@@ -10,7 +10,7 @@ interface Props {
 }
 
 /** Paperwork from the official sheet — offered, never required */
-const EXTRA_FIELDS = ['breed', 'birthDate', 'chip', 'pedigree', 'scorebook', 'catalog'] as const
+const EXTRA_FIELDS = ['breed', 'sex', 'birthDate', 'chip', 'pedigree', 'scorebook', 'catalog', 'phone'] as const
 type ExtraKey = typeof EXTRA_FIELDS[number]
 const emptyExtras = () => Object.fromEntries(EXTRA_FIELDS.map(k => [k, ''])) as Record<ExtraKey, string>
 
@@ -121,7 +121,7 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
       <div className="participants-header">
         <button className="part-back-btn" onClick={onBack}>{t.back}</button>
         <div className="participants-title">
-          <h1>FCI <span>Mondioring</span></h1>
+          <h1>Mondioring <span>ScoreRing</span></h1>
           <p>{t.levelParticipants(levelLabel)}</p>
         </div>
       </div>
@@ -192,13 +192,26 @@ export default function ParticipantsScreen({ level, initial, onStart, onBack }: 
             {EXTRA_FIELDS.map(k => (
               <div className="field-group" key={k}>
                 <label htmlFor={`x-${k}`}>{t.extraFields[k]}</label>
-                <input
-                  id={`x-${k}`}
-                  type={k === 'birthDate' ? 'date' : 'text'}
-                  autoComplete="off"
-                  value={extras[k]}
-                  onChange={e => setExtras(prev => ({ ...prev, [k]: e.target.value }))}
-                />
+                {k === 'sex' ? (
+                  <select
+                    id={`x-${k}`}
+                    className="practice-select"
+                    value={extras[k]}
+                    onChange={e => setExtras(prev => ({ ...prev, [k]: e.target.value }))}
+                  >
+                    {Object.entries(t.sexOptions).map(([v, label]) => (
+                      <option key={v} value={v ? label : ''}>{label}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={`x-${k}`}
+                    type={k === 'birthDate' ? 'date' : k === 'phone' ? 'tel' : 'text'}
+                    autoComplete="off"
+                    value={extras[k]}
+                    onChange={e => setExtras(prev => ({ ...prev, [k]: e.target.value }))}
+                  />
+                )}
               </div>
             ))}
           </div>

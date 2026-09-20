@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import type { Level, Participant, CompletedResult, ResultStatus } from './types'
+import type { Level, Participant, CompletedResult, ResultStatus, ScoreMap } from './types'
 import { useScoring } from './hooks/useScoring'
 import { JUMP_RULE } from './data/exercises'
 import { loadTrial, saveTrial, clearTrial, type TrialDetails } from './data/session'
-import { LangProvider } from './i18n/LangContext'
+import { LangProvider, useLang } from './i18n/LangContext'
 import SetupScreen       from './components/SetupScreen'
 import ParticipantsScreen from './components/ParticipantsScreen'
 import ExerciseOrderScreen, { JUMP_SLOT } from './components/ExerciseOrderScreen'
@@ -12,10 +12,12 @@ import QuizScreen from './components/QuizScreen'
 import JudgeScreen       from './components/JudgeScreen'
 import ScoreSheet        from './components/ScoreSheet'
 import ResultsSummary    from './components/ResultsSummary'
+import ReportScreen from './report/ReportScreen'
+import type { ReportPage } from './report/ReportSheet'
 
-type Screen = 'setup' | 'participants' | 'order' | 'practice' | 'quiz' | 'judge' | 'sheet' | 'results'
+type Screen = 'setup' | 'participants' | 'order' | 'practice' | 'quiz' | 'judge' | 'sheet' | 'results' | 'report'
 
-const SCORED: Screen[] = ['judge', 'sheet', 'results']
+const SCORED: Screen[] = ['judge', 'sheet', 'results', 'report']
 
 function AppInner() {
   const [screen, setScreen]         = useState<Screen>('setup')
@@ -26,9 +28,12 @@ function AppInner() {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completed, setCompleted]   = useState<CompletedResult[]>([])
   const [jumpChoice, setJumpChoice] = useState('')
+  const [remarks, setRemarks]       = useState<Record<string, string>>({})
+  const [report, setReport]         = useState<{ pages: ReportPage[]; back: Screen } | null>(null)
   const [resumable, setResumable]   = useState(() => loadTrial())
 
   const scoring = useScoring()
+  const { t } = useLang()
 
   // A trial in progress is written after every change, so a reload, a locked
   // phone or a service-worker update cannot lose a morning of judging.
@@ -37,7 +42,7 @@ function AppInner() {
     saveTrial({
       v: 1,
       savedAt: Date.now(),
-      screen: screen as 'judge' | 'sheet' | 'results',
+      screen: (screen === 'report' ? (report?.back ?? 'results') : screen) as 'judge' | 'sheet' | 'results',
       level,
       details,
       participants,
@@ -45,9 +50,10 @@ function AppInner() {
       currentIdx,
       completed,
       jumpChoice,
+      remarks,
       scores: scoring.scores,
     })
-  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, jumpChoice, scoring.scores])
+  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, jumpChoice, remarks, scoring.scores])
 
   function resume() {
     const save = resumable
@@ -58,6 +64,7 @@ function AppInner() {
     setExerciseOrder(save.order)
     setCurrentIdx(save.currentIdx)
     setCompleted(save.completed)
+    setRemarks(save.remarks ?? {})
     const choice = save.jumpChoice || defaultJump(save.level)
     setJumpChoice(choice)
     scoring.restoreSession(save.level, runOrder(save.order, choice), save.scores)
@@ -112,14 +119,29 @@ function AppInner() {
   // ── Sheet → Next competitor (or results) ──────────────────
   function handleNextCompetitor(status: ResultStatus = 'scored') {
     const current = participants[currentIdx]
-    const { total, max } = scoring.getTotals()
+    const { max } = scoring.getTotals()
+
+    // An eliminated dog keeps what it scored up to the exercise it was sent out
+    // on; everything after that was never run and scores nothing
+    let scores: ScoreMap = { ...scoring.scores }
+    if (status === 'eliminated') {
+      scoring.exercises.forEach((ex, i) => {
+        if (i <= scoring.currentExIndex) return
+        const mx = scoring.getExerciseMax(ex)
+        scores[ex.id] = { ...scores[ex.id], deductions: mx, disqualified: true, log: [{ desc: t.eliminatedNote, pts: -mx, isDisq: true }] }
+      })
+    }
+    const total = status === 'absent' ? 0 : scoring.exercises.reduce(
+      (sum, ex) => sum + Math.max(0, scoring.getExerciseMax(ex) - (scores[ex.id]?.deductions ?? 0)), 0)
+
     const snapshot: CompletedResult = {
       participant: current,
-      scores: { ...scoring.scores },
-      // A dog that never ran has no score to report
-      total: status === 'absent' ? 0 : total,
+      scores,
+      total,
       max,
       status,
+      remarks: remarks[current.id],
+      jumpChoice,
     }
     setCompleted(prev => {
       const existing = prev.findIndex(r => r.participant.id === current.id)
@@ -143,6 +165,29 @@ function AppInner() {
     }
   }
 
+  // ── The printed scoresheet, for one dog or for all of them ─
+  function openReportForCurrent() {
+    const p = participants[currentIdx]
+    setReport({
+      back: 'sheet',
+      pages: [{ participant: p, scores: scoring.scores, status: 'scored', remarks: remarks[p.id] }],
+    })
+    setScreen('report')
+  }
+
+  function openReportForAll() {
+    setReport({
+      back: 'results',
+      pages: completed.map(r => ({
+        participant: r.participant,
+        scores: r.scores,
+        status: r.status ?? 'scored',
+        remarks: r.remarks ?? remarks[r.participant.id],
+      })),
+    })
+    setScreen('report')
+  }
+
   // ── Results → restart ─────────────────────────────────────
   function handleRestart() {
     clearTrial()
@@ -153,6 +198,8 @@ function AppInner() {
     setExerciseOrder([])
     setCurrentIdx(0)
     setCompleted([])
+    setRemarks({})
+    setReport(null)
   }
 
   // ── Render ────────────────────────────────────────────────
@@ -200,6 +247,17 @@ function AppInner() {
     )
   }
 
+  if (screen === 'report' && report && level) {
+    return (
+      <ReportScreen
+        level={level}
+        details={details}
+        pages={report.pages}
+        onBack={() => setScreen(report.back)}
+      />
+    )
+  }
+
   if (screen === 'results') {
     return (
       <ResultsSummary
@@ -207,6 +265,7 @@ function AppInner() {
         details={details}
         completed={completed}
         onRestart={handleRestart}
+        onReport={openReportForAll}
       />
     )
   }
@@ -226,6 +285,9 @@ function AppInner() {
         totalCompetitors={participants.length}
         onBack={handleBackToJudge}
         onNext={() => handleNextCompetitor('scored')}
+        remarks={remarks[currentParticipant.id] ?? ''}
+        onRemarksChange={v => setRemarks(prev => ({ ...prev, [currentParticipant.id]: v }))}
+        onReport={openReportForCurrent}
       />
     )
   }

@@ -15,6 +15,7 @@ export default function TrialHeader({ details, level, participant }: {
 
   const items: [string, string | undefined][] = [
     [t.detailDate, details.date],
+    [t.detailOrganization, details.organization],
     [t.detailLocation, details.location],
     [t.detailClub, details.club],
     [t.detailJudge, details.judge],

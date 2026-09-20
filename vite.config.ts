@@ -12,9 +12,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/*.png', 'icons/*.svg'],
       manifest: {
-        name: 'FCI Mondioring – Judge Scoring',
-        short_name: 'Mondioring',
-        description: 'FCI Mondioring judge scoring app for Levels I, II & III',
+        name: 'Mondioring – ScoreRing app',
+        short_name: 'ScoreRing',
+        description: 'Mondioring – ScoreRing: judge scoring app for Levels I, II & III',
         theme_color: '#0a0c10',
         background_color: '#0a0c10',
         display: 'standalone',

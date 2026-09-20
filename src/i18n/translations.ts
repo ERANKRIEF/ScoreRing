@@ -126,6 +126,27 @@ export interface Translations {
   jumpSlotHint: string
   orderSlotHint: (lvl: string, n: number) => string
   judgeJumpPick: string
+
+  // Printed report
+  detailOrganization: string
+  sigJudge: string
+  sigDecoys: string
+  sigClear: string
+  sigHint: string
+  sexOptions: Record<string, string>
+  remarksLabel: string
+  remarksPlaceholder: string
+  reportBtn: string
+  reportAllBtn: string
+  reportTitle: string
+  reportShareBtn: string
+  reportWorking: (done: number, total: number) => string
+  reportWorkingShort: string
+  reportShared: string
+  reportDownloaded: string
+  reportError: (msg: string) => string
+  sheetHeightNote: (label: string, pts: number, nominal: number) => string
+  eliminatedNote: string
   levelShort: (lvl: string) => string
 
   // Participants
@@ -238,7 +259,7 @@ const en: Translations = {
   dir: 'ltr',
   langName: 'English',
 
-  appName: 'FCI Mondioring',
+  appName: 'Mondioring – ScoreRing',
   appTagline: 'Judge Scoring App',
 
   langEn: 'EN',
@@ -322,6 +343,7 @@ const en: Translations = {
   extraFields: {
     breed: 'Breed', birthDate: 'Date of birth', chip: 'Chip',
     pedigree: 'Pedigree no.', scorebook: 'Scorebook no.', catalog: 'Catalogue no.',
+    sex: 'Sex', phone: 'Phone',
   },
   printBtn: 'Print / PDF',
   competitorCounter: (pos, total) => `Competitor ${pos} of ${total}`,
@@ -352,6 +374,25 @@ const en: Translations = {
   jumpSlotHint: 'Apparatus chosen at the ring',
   orderSlotHint: (lvl, n) => `Level ${lvl}: ${n === 1 ? 'one jump is' : `${n} jumps are`} run, and each handler chooses the apparatus for their own dog. Number the slot here; pick the apparatus while judging.`,
   judgeJumpPick: 'Which jump is this handler running',
+  detailOrganization: 'Organization',
+  sigJudge: 'Judge\'s signature',
+  sigDecoys: 'Decoys\' signature',
+  sigClear: 'Clear',
+  sigHint: 'Sign here with a finger',
+  sexOptions: { '': '—', male: 'Male', female: 'Female' },
+  remarksLabel: 'Judge\'s remarks',
+  remarksPlaceholder: 'Printed on the scoresheet — optional',
+  reportBtn: 'Produce scoresheet',
+  reportAllBtn: 'Produce all scoresheets',
+  reportTitle: 'Scoresheet',
+  reportShareBtn: 'Share / save PDF',
+  reportWorking: (d, t) => `Preparing PDF… ${d}/${t}`,
+  reportWorkingShort: 'Preparing…',
+  reportShared: 'PDF ready.',
+  reportDownloaded: 'PDF downloaded.',
+  reportError: m => `Could not create the PDF: ${m}`,
+  sheetHeightNote: (label, pts, nominal) => `${pts - nominal} · jumped ${label} (${pts} of ${nominal})`,
+  eliminatedNote: 'Not run — eliminated',
   levelShort: lvl => `Level ${lvl}`,
   jumpPerformedLabel: 'Jumping · performed',
   jumpDefaultNote: 'Counting the full height until you record the one the handler chose.',
@@ -423,7 +464,7 @@ const en: Translations = {
 
   trialResults: 'Trial',
   trialResultsSpan: 'Results',
-  resultsSubtitle: (lvl, count) => `FCI Mondioring — Level ${lvl} · ${count} competitors`,
+  resultsSubtitle: (lvl, count) => `Mondioring – ScoreRing — Level ${lvl} · ${count} competitors`,
   newTrialBtn: 'New Trial',
   rankCol: 'Rank',
   handlerDogColResults: 'Handler / Dog',
@@ -704,7 +745,7 @@ const fr: Translations = {
   dir: 'ltr',
   langName: 'Français',
 
-  appName: 'FCI Mondioring',
+  appName: 'Mondioring – ScoreRing',
   appTagline: 'Application de Notation',
 
   langEn: 'EN',
@@ -788,6 +829,7 @@ const fr: Translations = {
   extraFields: {
     breed: 'Race', birthDate: 'Date de naissance', chip: 'Puce',
     pedigree: 'N° de pedigree', scorebook: 'N° de carnet', catalog: 'N° de catalogue',
+    sex: 'Sexe', phone: 'Téléphone',
   },
   printBtn: 'Imprimer / PDF',
   competitorCounter: (pos, total) => `Concurrent ${pos} sur ${total}`,
@@ -818,6 +860,25 @@ const fr: Translations = {
   jumpSlotHint: 'Agrès choisi sur le terrain',
   orderSlotHint: (lvl, n) => `Niveau ${lvl} : ${n === 1 ? 'un saut est effectué' : `${n} sauts sont effectués`}, et chaque conducteur choisit l\'agrès pour son chien. Numérotez l\'emplacement ici ; choisissez l\'agrès pendant le jugement.`,
   judgeJumpPick: 'Quel saut ce conducteur effectue',
+  detailOrganization: 'Organisation',
+  sigJudge: 'Signature du juge',
+  sigDecoys: 'Signature des hommes d\'attaque',
+  sigClear: 'Effacer',
+  sigHint: 'Signez ici avec le doigt',
+  sexOptions: { '': '—', male: 'Mâle', female: 'Femelle' },
+  remarksLabel: 'Remarques du juge',
+  remarksPlaceholder: 'Imprimées sur la feuille — facultatif',
+  reportBtn: 'Produire la feuille de notes',
+  reportAllBtn: 'Produire toutes les feuilles',
+  reportTitle: 'Feuille de notes',
+  reportShareBtn: 'Partager / enregistrer le PDF',
+  reportWorking: (d, t) => `Préparation du PDF… ${d}/${t}`,
+  reportWorkingShort: 'Préparation…',
+  reportShared: 'PDF prêt.',
+  reportDownloaded: 'PDF téléchargé.',
+  reportError: m => `Impossible de créer le PDF : ${m}`,
+  sheetHeightNote: (label, pts, nominal) => `${pts - nominal} · saut à ${label} (${pts} sur ${nominal})`,
+  eliminatedNote: 'Non effectué — éliminé',
   levelShort: lvl => `Niveau ${lvl}`,
   jumpPerformedLabel: 'Saut · effectué',
   jumpDefaultNote: 'La hauteur maximale est comptée tant que celle du conducteur n\'est pas saisie.',
@@ -889,7 +950,7 @@ const fr: Translations = {
 
   trialResults: 'Résultats',
   trialResultsSpan: 'du Concours',
-  resultsSubtitle: (lvl, count) => `FCI Mondioring — Niveau ${lvl} · ${count} concurrent${count !== 1 ? 's' : ''}`,
+  resultsSubtitle: (lvl, count) => `Mondioring – ScoreRing — Niveau ${lvl} · ${count} concurrent${count !== 1 ? 's' : ''}`,
   newTrialBtn: 'Nouveau Concours',
   rankCol: 'Rang',
   handlerDogColResults: 'Conducteur / Chien',
@@ -1170,7 +1231,7 @@ const he: Translations = {
   dir: 'rtl',
   langName: 'עברית',
 
-  appName: 'FCI מונדיורינג',
+  appName: 'מונדיורינג – ScoreRing',
   appTagline: 'אפליקציית ניקוד שיפוט',
 
   langEn: 'EN',
@@ -1254,6 +1315,7 @@ const he: Translations = {
   extraFields: {
     breed: 'גזע', birthDate: 'תאריך לידה', chip: 'מספר שבב',
     pedigree: 'מספר סגיר', scorebook: 'מספר פנקס עבודה', catalog: 'מספר קטלוגי',
+    sex: 'מין', phone: 'טלפון',
   },
   printBtn: 'הדפסה / PDF',
   competitorCounter: (pos, total) => `מתחרה ${pos} מתוך ${total}`,
@@ -1284,6 +1346,25 @@ const he: Translations = {
   jumpSlotHint: 'המתקן נבחר בזירה',
   orderSlotHint: (lvl, n) => `רמה ${lvl}: מבצעים ${n === 1 ? 'קפיצה אחת' : `${n} קפיצות`}, וכל נוהג בוחר בעצמו את המתקן לכלב שלו. כאן קובעים רק את מקומה בסדר; את המתקן בוחרים בזמן השיפוט.`,
   judgeJumpPick: 'איזו קפיצה מבצע הנוהג הזה',
+  detailOrganization: 'ארגון',
+  sigJudge: 'חתימת השופט',
+  sigDecoys: 'חתימת הדיקויים',
+  sigClear: 'ניקוי',
+  sigHint: 'חתום כאן באצבע',
+  sexOptions: { '': '—', male: 'זכר', female: 'נקבה' },
+  remarksLabel: 'הערות השופט',
+  remarksPlaceholder: 'יודפסו בדוח השיפוט — רשות',
+  reportBtn: 'הפק דוח שיפוט',
+  reportAllBtn: 'הפק דוחות שיפוט לכל המתחרים',
+  reportTitle: 'דוח שיפוט',
+  reportShareBtn: 'שתף / שמור PDF',
+  reportWorking: (d, t) => `מכין PDF… ${d}/${t}`,
+  reportWorkingShort: 'מכין…',
+  reportShared: 'ה-PDF מוכן.',
+  reportDownloaded: 'ה-PDF ירד למכשיר.',
+  reportError: m => `לא הצלחתי ליצור את ה-PDF: ${m}`,
+  sheetHeightNote: (label, pts, nominal) => `${pts - nominal} · קפיצה ב-${label} (${pts} מתוך ${nominal})`,
+  eliminatedNote: 'לא בוצע — פסילה',
   levelShort: lvl => `רמה ${lvl}`,
   jumpPerformedLabel: 'קפיצה · מבוצע',
   jumpDefaultNote: 'נספר הגובה המלא עד שתסמן את הגובה שהנוהג בחר.',
@@ -1355,7 +1436,7 @@ const he: Translations = {
 
   trialResults: 'תוצאות',
   trialResultsSpan: 'התחרות',
-  resultsSubtitle: (lvl, count) => `FCI מונדיורינג — רמה ${lvl} · ${count} מתחרים`,
+  resultsSubtitle: (lvl, count) => `ScoreRing — רמה ${lvl} · ${count} מתחרים`,
   newTrialBtn: 'תחרות חדשה',
   rankCol: 'דירוג',
   handlerDogColResults: 'נוהג / כלב',

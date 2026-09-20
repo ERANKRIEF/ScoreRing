@@ -2,10 +2,14 @@ import type { CompletedResult, Level, Participant, ScoreMap } from '../types'
 
 export interface TrialDetails {
   date?: string
+  organization?: string
   location?: string
   club?: string
   judge?: string
   decoys?: string
+  /** Finger-drawn signatures as PNG data URLs, collected before the trial */
+  judgeSignature?: string
+  decoysSignature?: string
 }
 
 /** Everything needed to put a half-scored trial back on screen */
@@ -21,6 +25,8 @@ export interface TrialSave {
   completed: CompletedResult[]
   /** Which apparatus the competitor being judged is running */
   jumpChoice?: string
+  /** Judge's remarks per participant id, for the printed sheet */
+  remarks?: Record<string, string>
   scores: ScoreMap
 }
 
