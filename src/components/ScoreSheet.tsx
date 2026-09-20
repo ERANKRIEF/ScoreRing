@@ -19,6 +19,8 @@ interface Props extends ScoringHook {
   remarks: string
   onRemarksChange: (v: string) => void
   onReport: () => void
+  /** Reopened from the results screen: the button saves and goes back there */
+  editing?: boolean
 }
 
 export default function ScoreSheet(props: Props) {
@@ -26,7 +28,7 @@ export default function ScoreSheet(props: Props) {
     exercises, level, getExerciseState, getExerciseMax,
     participant, details,
     competitorIndex, totalCompetitors,
-    onBack, onNext, remarks, onRemarksChange, onReport,
+    onBack, onNext, remarks, onRemarksChange, onReport, editing,
   } = props
 
   const { handlerName, dogName, startNumber } = participant
@@ -161,7 +163,7 @@ export default function ScoreSheet(props: Props) {
         <button className="practice-btn report-btn" onClick={onReport}>{t.reportBtn}</button>
 
         <button className="next-competitor-btn" onClick={onNext}>
-          {isLast ? t.finishTrialBtn : t.nextCompetitorBtn(position + 1, totalCompetitors)}
+          {editing ? t.saveEditBtn : isLast ? t.finishTrialBtn : t.nextCompetitorBtn(position + 1, totalCompetitors)}
         </button>
       </div>
     </div>

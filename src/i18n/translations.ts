@@ -240,6 +240,15 @@ export interface Translations {
   trialResultsSpan: string
   resultsSubtitle: (lvl: string, count: number) => string
   newTrialBtn: string
+  homeBtn: string
+  closeTrialBtn: string
+  closeTrialTitle: string
+  closeTrialBody: string
+  yes: string
+  no: string
+  saveEditBtn: string
+  editedMark: string
+  rowEditHint: string
   rankCol: string
   handlerDogColResults: string
   resultCol: string
@@ -502,6 +511,15 @@ const en: Translations = {
   trialResultsSpan: 'Results',
   resultsSubtitle: (lvl, count) => `Mondioring – ScoreRing — Level ${lvl} · ${count} competitors`,
   newTrialBtn: 'New Trial',
+  homeBtn: 'Home',
+  closeTrialBtn: 'Finish',
+  closeTrialTitle: 'Close the trial?',
+  closeTrialBody: 'The results are kept on this device and the ring is cleared for the next trial.',
+  yes: 'Yes',
+  no: 'No',
+  saveEditBtn: 'Save changes → Results',
+  editedMark: 'Edited after the run',
+  rowEditHint: 'Tap to review or edit',
   rankCol: 'Rank',
   handlerDogColResults: 'Handler / Dog',
   resultCol: 'Result',
@@ -1006,6 +1024,15 @@ const fr: Translations = {
   trialResultsSpan: 'du Concours',
   resultsSubtitle: (lvl, count) => `Mondioring – ScoreRing — Niveau ${lvl} · ${count} concurrent${count !== 1 ? 's' : ''}`,
   newTrialBtn: 'Nouveau Concours',
+  homeBtn: 'Accueil',
+  closeTrialBtn: 'Terminer',
+  closeTrialTitle: 'Clôturer le concours ?',
+  closeTrialBody: 'Les résultats restent sur cet appareil et le ring est libéré pour le concours suivant.',
+  yes: 'Oui',
+  no: 'Non',
+  saveEditBtn: 'Enregistrer → Résultats',
+  editedMark: 'Modifié après le passage',
+  rowEditHint: 'Touchez pour vérifier ou modifier',
   rankCol: 'Rang',
   handlerDogColResults: 'Conducteur / Chien',
   resultCol: 'Résultat',
@@ -1510,6 +1537,15 @@ const he: Translations = {
   trialResultsSpan: 'התחרות',
   resultsSubtitle: (lvl, count) => `ScoreRing — רמה ${lvl} · ${count} מתחרים`,
   newTrialBtn: 'תחרות חדשה',
+  homeBtn: 'מסך ראשי',
+  closeTrialBtn: 'סיום',
+  closeTrialTitle: 'האם לסגור את המבחן?',
+  closeTrialBody: 'התוצאות יישמרו במכשיר והזירה תתפנה למבחן הבא.',
+  yes: 'כן',
+  no: 'לא',
+  saveEditBtn: 'שמירת השינויים וחזרה לתוצאות',
+  editedMark: 'נערך לאחר השיפוט',
+  rowEditHint: 'לחיצה לצפייה או עריכה',
   rankCol: 'דירוג',
   handlerDogColResults: 'נוהג / כלב',
   resultCol: 'תוצאה',

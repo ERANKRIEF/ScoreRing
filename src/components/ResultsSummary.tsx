@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Level, CompletedResult } from '../types'
 import type { TrialDetails } from '../data/session'
 import { qualify } from '../data/qualify'
@@ -8,12 +9,15 @@ interface Props {
   level: Level
   details: TrialDetails
   completed: CompletedResult[]
-  onRestart: () => void
+  onHome: () => void
+  onClose: () => void
   onReport: () => void
+  onEdit: (r: CompletedResult) => void
 }
 
-export default function ResultsSummary({ level, details, completed, onRestart, onReport }: Props) {
+export default function ResultsSummary({ level, details, completed, onHome, onClose, onReport, onEdit }: Props) {
   const { t } = useLang()
+  const [confirmClose, setConfirmClose] = useState(false)
   // A dog that did not run is listed but not placed
   const ran = completed.filter(r => (r.status ?? 'scored') === 'scored')
   const notRanked = completed.filter(r => (r.status ?? 'scored') !== 'scored')
@@ -30,7 +34,8 @@ export default function ResultsSummary({ level, details, completed, onRestart, o
         <div className="sheet-header-actions">
           <button className="new-trial-btn" onClick={onReport}>{t.reportAllBtn}</button>
           <button className="new-trial-btn" onClick={() => window.print()}>{t.printBtn}</button>
-          <button className="new-trial-btn" onClick={onRestart}>{t.newTrialBtn}</button>
+          <button className="new-trial-btn" onClick={onHome}>{t.homeBtn}</button>
+          <button className="new-trial-btn new-trial-btn--close" onClick={() => setConfirmClose(true)}>{t.closeTrialBtn}</button>
         </div>
       </div>
 
@@ -52,10 +57,16 @@ export default function ResultsSummary({ level, details, completed, onRestart, o
           const isFirst  = idx === 0 && !out
           const rankIcon = out ? '—' : idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `${idx + 1}.`
 
+          const editable = r.status !== 'absent'
           return (
             <div
               key={r.participant.id}
-              className={`results-row${isFirst ? ' results-row--first' : ''}${out ? ' results-row--out' : ''}${idx % 2 === 0 ? '' : ' results-row--alt'}`}
+              role={editable ? 'button' : undefined}
+              tabIndex={editable ? 0 : undefined}
+              title={editable ? t.rowEditHint : undefined}
+              onClick={editable ? () => onEdit(r) : undefined}
+              onKeyDown={editable ? e => { if (e.key === 'Enter' || e.key === ' ') onEdit(r) } : undefined}
+              className={`results-row${isFirst ? ' results-row--first' : ''}${out ? ' results-row--out' : ''}${idx % 2 === 0 ? '' : ' results-row--alt'}${editable ? ' results-row--editable' : ''}`}
             >
               <span className="rt-rank">{rankIcon}</span>
               <span className="rt-start">#{r.participant.startNumber}</span>
@@ -67,11 +78,25 @@ export default function ResultsSummary({ level, details, completed, onRestart, o
               <span className="rt-score-val">
                 {out && r.status === 'absent' ? '—' : r.total}
                 {!(out && r.status === 'absent') && <span className="rt-max">/{r.max}</span>}
+                {r.edited && <span className="rt-edited" title={t.editedMark}>*</span>}
               </span>
             </div>
           )
         })}
       </div>
+
+      {confirmClose && (
+        <div className="modal-overlay open" onClick={() => setConfirmClose(false)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">{t.closeTrialTitle}</div>
+            <div className="modal-desc">{t.closeTrialBody}</div>
+            <div className="confirm-actions">
+              <button className="modal-cancel-btn" onClick={() => { setConfirmClose(false); onHome() }}>{t.no}</button>
+              <button className="modal-apply-btn disq" onClick={() => { setConfirmClose(false); onClose() }}>{t.yes}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

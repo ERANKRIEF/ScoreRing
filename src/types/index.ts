@@ -73,4 +73,6 @@ export interface CompletedResult {
   remarks?: string
   /** Which apparatus this dog took where the handler had a choice */
   jumpChoice?: string
+  /** Changed from the results screen after the run was first closed */
+  edited?: boolean
 }

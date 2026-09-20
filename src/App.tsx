@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Level, Participant, CompletedResult, ResultStatus, ScoreMap } from './types'
 import { useScoring } from './hooks/useScoring'
 import { JUMP_RULE } from './data/exercises'
-import { loadTrial, saveTrial, clearTrial, type TrialDetails } from './data/session'
+import { loadTrial, saveTrial, clearTrial, archiveTrial, type TrialDetails } from './data/session'
 import { LangProvider, useLang } from './i18n/LangContext'
 import SetupScreen       from './components/SetupScreen'
 import TrialDetailsScreen from './components/TrialDetailsScreen'
@@ -33,6 +33,7 @@ function AppInner() {
   const [currentIdx, setCurrentIdx] = useState(0)
   const [completed, setCompleted]   = useState<CompletedResult[]>([])
   const [jumpChoice, setJumpChoice] = useState('')
+  const [editingId, setEditingId]   = useState<string | null>(null)
   const [remarks, setRemarks]       = useState<Record<string, string>>({})
   const [report, setReport]         = useState<{ pages: ReportPage[]; back: Screen } | null>(null)
   const [resumable, setResumable]   = useState(() => loadTrial())
@@ -57,8 +58,9 @@ function AppInner() {
       jumpChoice,
       remarks,
       scores: scoring.scores,
+      editingId: editingId ?? undefined,
     })
-  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, jumpChoice, remarks, scoring.scores])
+  }, [screen, level, details, participants, exerciseOrder, currentIdx, completed, jumpChoice, remarks, scoring.scores, editingId])
 
   function resume() {
     const save = resumable
@@ -73,6 +75,7 @@ function AppInner() {
     const choice = save.jumpChoice || defaultJump(save.level)
     setJumpChoice(choice)
     scoring.restoreSession(save.level, runOrder(save.order, choice), save.scores)
+    setEditingId(save.editingId ?? null)
     setResumable(null)
     setScreen(save.screen)
   }
@@ -151,12 +154,23 @@ function AppInner() {
     setCompleted(prev => {
       const existing = prev.findIndex(r => r.participant.id === current.id)
       if (existing >= 0) {
+        const before = prev[existing]
+        const changed = JSON.stringify(before.scores) !== JSON.stringify(scores)
+          || (before.status ?? 'scored') !== status
+          || (before.remarks ?? '') !== (snapshot.remarks ?? '')
         const updated = [...prev]
-        updated[existing] = snapshot
+        updated[existing] = { ...snapshot, edited: before.edited || (editingId !== null && changed) }
         return updated
       }
       return [...prev, snapshot]
     })
+
+    // A correction goes straight back to the results, not on to the next dog
+    if (editingId) {
+      setEditingId(null)
+      setScreen('results')
+      return
+    }
 
     const nextIdx = currentIdx + 1
     if (nextIdx >= participants.length) {
@@ -193,6 +207,30 @@ function AppInner() {
     setScreen('report')
   }
 
+  // ── Results → reopen one dog's run for correction ─────────
+  function handleEditResult(r: CompletedResult) {
+    const idx = participants.findIndex(p => p.id === r.participant.id)
+    if (idx < 0) return
+    const choice = r.jumpChoice || defaultJump(level!)
+    setCurrentIdx(idx)
+    setJumpChoice(choice)
+    scoring.restoreSession(level!, runOrder(exerciseOrder, choice), r.scores, 0)
+    setEditingId(r.participant.id)
+    setScreen('sheet')
+  }
+
+  // ── Results → home, trial kept open for 'carry on judging' ─
+  function handleHome() {
+    setResumable(loadTrial())
+    setScreen('setup')
+  }
+
+  // ── Results → close: archive on the device, clear the ring ─
+  function handleCloseTrial() {
+    if (level) archiveTrial({ closedAt: Date.now(), level, details, completed })
+    handleRestart()
+  }
+
   // ── Results → restart ─────────────────────────────────────
   function handleRestart() {
     clearTrial()
@@ -205,6 +243,7 @@ function AppInner() {
     setCompleted([])
     setRemarks({})
     setReport(null)
+    setEditingId(null)
   }
 
   // ── Render ────────────────────────────────────────────────
@@ -279,7 +318,9 @@ function AppInner() {
         level={level!}
         details={details}
         completed={completed}
-        onRestart={handleRestart}
+        onHome={handleHome}
+        onClose={handleCloseTrial}
+        onEdit={handleEditResult}
         onReport={openReportForAll}
       />
     )
@@ -303,6 +344,7 @@ function AppInner() {
         remarks={remarks[currentParticipant.id] ?? ''}
         onRemarksChange={v => setRemarks(prev => ({ ...prev, [currentParticipant.id]: v }))}
         onReport={openReportForCurrent}
+        editing={editingId !== null}
       />
     )
   }

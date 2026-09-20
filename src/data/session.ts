@@ -45,6 +45,8 @@ export interface TrialSave {
   /** Judge's remarks per participant id, for the printed sheet */
   remarks?: Record<string, string>
   scores: ScoreMap
+  /** A closed run reopened from the results screen for correction */
+  editingId?: string
 }
 
 const KEY = 'scorering.trial.v1'
@@ -73,5 +75,35 @@ export function clearTrial() {
     localStorage.removeItem(KEY)
   } catch {
     // Nothing to do — a stale save is offered again and can be dismissed
+  }
+}
+
+/** Closed trials, kept on the device so results survive after the ring is cleared */
+export interface ArchivedTrial {
+  closedAt: number
+  level: Level
+  details: TrialDetails
+  completed: CompletedResult[]
+}
+
+const ARCHIVE_KEY = 'scorering.archive.v1'
+const ARCHIVE_MAX = 50
+
+export function archiveTrial(entry: ArchivedTrial) {
+  try {
+    const list = loadArchive()
+    list.unshift(entry)
+    localStorage.setItem(ARCHIVE_KEY, JSON.stringify(list.slice(0, ARCHIVE_MAX)))
+  } catch {
+    // Out of quota: the trial still closes, only the archive copy is lost
+  }
+}
+
+export function loadArchive(): ArchivedTrial[] {
+  try {
+    const raw = localStorage.getItem(ARCHIVE_KEY)
+    return raw ? (JSON.parse(raw) as ArchivedTrial[]) : []
+  } catch {
+    return []
   }
 }
