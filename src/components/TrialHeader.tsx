@@ -1,5 +1,5 @@
 import type { Level, Participant } from '../types'
-import type { TrialDetails } from '../data/session'
+import { decoyEntries, type TrialDetails } from '../data/session'
 import { useLang } from '../i18n/LangContext'
 
 /**
@@ -19,7 +19,7 @@ export default function TrialHeader({ details, level, participant }: {
     [t.detailLocation, details.location],
     [t.detailClub, details.club],
     [t.detailJudge, details.judge],
-    [t.detailDecoys, details.decoys],
+    [t.detailDecoys, decoyEntries(details).map(d => d.name).filter(Boolean).join(', ')],
     [t.extraFields.breed, participant?.breed],
     [t.extraFields.birthDate, participant?.birthDate],
     [t.extraFields.chip, participant?.chip],

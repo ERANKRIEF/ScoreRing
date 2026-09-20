@@ -1,17 +1,14 @@
 import { useState } from 'react'
 import type { Level } from '../types'
-import type { TrialDetails, TrialSave } from '../data/session'
+import type { TrialSave } from '../data/session'
 import { useLang } from '../i18n/LangContext'
 import type { Lang } from '../i18n/translations'
-import SignaturePad from './SignaturePad'
 
 interface Props {
-  details: TrialDetails
-  onDetailsChange: (d: TrialDetails) => void
   resumable: TrialSave | null
   onResume: () => void
   onDiscardSaved: () => void
-  onNext: (level: Level) => void
+  onStart: () => void
   onPractice: (level: Level) => void
   onQuiz: (level: Level) => void
 }
@@ -22,18 +19,17 @@ const LANG_OPTS: { key: Lang; flag: string; label: string }[] = [
   { key: 'he', flag: '🇮🇱', label: 'עב' },
 ]
 
+/** The home screen: one way into judging, one card for training, nothing to scroll */
 export default function SetupScreen(props: Props) {
-  const { details, onDetailsChange, resumable, onResume, onDiscardSaved, onNext, onPractice, onQuiz } = props
+  const { resumable, onResume, onDiscardSaved, onStart, onPractice, onQuiz } = props
   const { t, lang, setLang } = useLang()
-  const [level, setLevel] = useState<Level | null>(null)
-  const [showDetails, setShowDetails] = useState(true)
+  const [trainLevel, setTrainLevel] = useState<Level | null>(null)
+  const [confirmDiscard, setConfirmDiscard] = useState(false)
 
   function withLevel(run: (l: Level) => void) {
-    if (!level) { alert(t.alertSelectLevel); return }
-    run(level)
+    if (!trainLevel) { alert(t.alertSelectLevel); return }
+    run(trainLevel)
   }
-
-  const set = (k: keyof TrialDetails) => (v: string) => onDetailsChange({ ...details, [k]: v })
 
   return (
     <div className="setup-screen">
@@ -68,73 +64,32 @@ export default function SetupScreen(props: Props) {
           </div>
           <div className="resume-actions">
             <button className="start-btn" onClick={onResume}>{t.resumeBtn}</button>
-            <button className="part-back-btn" onClick={onDiscardSaved}>{t.resumeDiscardBtn}</button>
+            <button className="part-back-btn" onClick={() => setConfirmDiscard(true)}>{t.resumeDiscardBtn}</button>
           </div>
         </div>
       )}
 
-      <div className="setup-card">
-        <h2>{t.newTrial}</h2>
+      <button className="start-btn start-judging-btn" onClick={onStart}>
+        {t.startJudgingBtn}
+        <span>{t.startJudgingHint}</span>
+      </button>
 
+      <div className="setup-card training-card">
+        <h2>{t.trainingTitle}</h2>
         <div className="field-group">
-          <label>{t.competitionLevel}</label>
+          <label>{t.trainingLevelLabel}</label>
           <div className="level-picker">
             {([1, 2, 3] as Level[]).map(l => (
               <button
                 key={l}
-                className={`level-btn${level === l ? ' selected' : ''}`}
-                onClick={() => setLevel(l)}
+                className={`level-btn${trainLevel === l ? ' selected' : ''}`}
+                onClick={() => setTrainLevel(l)}
               >
                 {['I', 'II', 'III'][l - 1]}
               </button>
             ))}
           </div>
         </div>
-
-        <button
-          className="details-toggle"
-          onClick={() => setShowDetails(v => !v)}
-          aria-expanded={showDetails}
-        >
-          {showDetails ? '▾' : '▸'} {t.trialDetailsTitle}
-        </button>
-
-        {showDetails && (
-          <div className="details-grid">
-            {([
-              ['date', t.detailDate, 'date'],
-              ['organization', t.detailOrganization, 'text'],
-              ['location', t.detailLocation, 'text'],
-              ['club', t.detailClub, 'text'],
-              ['judge', t.detailJudge, 'text'],
-              ['decoys', t.detailDecoys, 'text'],
-            ] as const).map(([key, label, type]) => (
-              <div className="field-group" key={key}>
-                <label htmlFor={`d-${key}`}>{label}</label>
-                <input
-                  id={`d-${key}`}
-                  type={type}
-                  value={details[key] ?? ''}
-                  onChange={e => set(key)(e.target.value)}
-                />
-              </div>
-            ))}
-            <SignaturePad
-              label={t.sigJudge}
-              value={details.judgeSignature}
-              onChange={v => onDetailsChange({ ...details, judgeSignature: v })}
-            />
-            <SignaturePad
-              label={t.sigDecoys}
-              value={details.decoysSignature}
-              onChange={v => onDetailsChange({ ...details, decoysSignature: v })}
-            />
-          </div>
-        )}
-
-        <button className="start-btn" onClick={() => withLevel(onNext)}>
-          {t.addParticipantsBtn}
-        </button>
 
         <button className="practice-btn" onClick={() => withLevel(onPractice)}>
           {t.practiceBtn}
@@ -148,6 +103,21 @@ export default function SetupScreen(props: Props) {
       </div>
 
       <div className="app-version">v{__APP_VERSION__}</div>
+
+      {confirmDiscard && (
+        <div className="modal-overlay open" onClick={() => setConfirmDiscard(false)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">{t.discardConfirmTitle}</div>
+            <div className="modal-desc">{t.discardConfirmBody}</div>
+            <div className="confirm-actions">
+              <button className="modal-cancel-btn" onClick={() => setConfirmDiscard(false)}>{t.confirmCancel}</button>
+              <button className="modal-apply-btn disq" onClick={() => { setConfirmDiscard(false); onDiscardSaved() }}>
+                {t.discardConfirmOk}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

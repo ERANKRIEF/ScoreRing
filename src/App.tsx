@@ -5,6 +5,7 @@ import { JUMP_RULE } from './data/exercises'
 import { loadTrial, saveTrial, clearTrial, type TrialDetails } from './data/session'
 import { LangProvider, useLang } from './i18n/LangContext'
 import SetupScreen       from './components/SetupScreen'
+import TrialDetailsScreen from './components/TrialDetailsScreen'
 import ParticipantsScreen from './components/ParticipantsScreen'
 import ExerciseOrderScreen, { JUMP_SLOT } from './components/ExerciseOrderScreen'
 import PracticeScreen from './components/PracticeScreen'
@@ -15,7 +16,7 @@ import ResultsSummary    from './components/ResultsSummary'
 import ReportScreen from './report/ReportScreen'
 import type { ReportPage } from './report/ReportSheet'
 
-type Screen = 'setup' | 'participants' | 'order' | 'practice' | 'quiz' | 'judge' | 'sheet' | 'results' | 'report'
+type Screen = 'setup' | 'trial' | 'participants' | 'order' | 'practice' | 'quiz' | 'judge' | 'sheet' | 'results' | 'report'
 
 const SCORED: Screen[] = ['judge', 'sheet', 'results', 'report']
 
@@ -210,14 +211,24 @@ function AppInner() {
   if (screen === 'setup') {
     return (
       <SetupScreen
-        details={details}
-        onDetailsChange={setDetails}
         resumable={resumable}
         onResume={resume}
         onDiscardSaved={discardSaved}
-        onNext={handleLevelSelected}
+        onStart={() => setScreen('trial')}
         onPractice={lvl => { setLevel(lvl); setScreen('practice') }}
         onQuiz={lvl => { setLevel(lvl); setScreen('quiz') }}
+      />
+    )
+  }
+
+  if (screen === 'trial') {
+    return (
+      <TrialDetailsScreen
+        details={details}
+        onDetailsChange={setDetails}
+        onNext={handleLevelSelected}
+        onBack={() => setScreen('setup')}
+        initialLevel={level}
       />
     )
   }
@@ -236,7 +247,7 @@ function AppInner() {
         level={level!}
         initial={participants}
         onStart={handleParticipantsDone}
-        onBack={() => setScreen('setup')}
+        onBack={() => setScreen('trial')}
       />
     )
   }

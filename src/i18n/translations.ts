@@ -19,6 +19,18 @@ export interface Translations {
   newTrial: string
   competitionLevel: string
   addParticipantsBtn: string
+  startJudgingBtn: string
+  startJudgingHint: string
+  trialScreenTitle: string
+  trialScreenHint: string
+  decoyLabel: (n: number) => string
+  decoySigLabel: string
+  toParticipantsBtn: string
+  trainingTitle: string
+  trainingLevelLabel: string
+  discardConfirmTitle: string
+  discardConfirmBody: string
+  discardConfirmOk: string
   alertSelectLevel: string
 
   // Exercise order
@@ -275,6 +287,18 @@ const en: Translations = {
   newTrial: 'New Trial',
   competitionLevel: 'Competition Level',
   addParticipantsBtn: 'Add Participants →',
+  startJudgingBtn: 'Start Judging',
+  startJudgingHint: 'Trial details, then the competitors',
+  trialScreenTitle: 'Trial details',
+  trialScreenHint: 'Printed on every scoresheet. Only the level is required.',
+  decoyLabel: n => `Decoy ${n}`,
+  decoySigLabel: 'Signature',
+  toParticipantsBtn: 'Continue to Participants →',
+  trainingTitle: 'Training',
+  trainingLevelLabel: 'Level to train',
+  discardConfirmTitle: 'Discard the open trial?',
+  discardConfirmBody: 'All scores of this trial will be deleted. This cannot be undone.',
+  discardConfirmOk: 'Yes, discard',
   alertSelectLevel: 'Please select a competition level.',
 
   back: '← Back',
@@ -767,6 +791,18 @@ const fr: Translations = {
   newTrial: 'Nouveau Concours',
   competitionLevel: 'Niveau de Compétition',
   addParticipantsBtn: 'Ajouter des Participants →',
+  startJudgingBtn: 'Commencer le jugement',
+  startJudgingHint: 'Détails du concours, puis les concurrents',
+  trialScreenTitle: 'Détails du concours',
+  trialScreenHint: 'Imprimés sur chaque feuille de notes. Seul le niveau est obligatoire.',
+  decoyLabel: n => `Homme d'attaque ${n}`,
+  decoySigLabel: 'Signature',
+  toParticipantsBtn: 'Continuer vers les concurrents →',
+  trainingTitle: 'Entraînement',
+  trainingLevelLabel: 'Niveau à travailler',
+  discardConfirmTitle: 'Supprimer le concours en cours ?',
+  discardConfirmBody: 'Toutes les notes de ce concours seront effacées. Irréversible.',
+  discardConfirmOk: 'Oui, supprimer',
   alertSelectLevel: 'Veuillez sélectionner un niveau de compétition.',
 
   back: '← Retour',
@@ -1259,6 +1295,18 @@ const he: Translations = {
   newTrial: 'תחרות חדשה',
   competitionLevel: 'רמת תחרות',
   addParticipantsBtn: 'הוספת משתתפים',
+  startJudgingBtn: 'תחילת שיפוט',
+  startJudgingHint: 'פרטי התחרות, ואחריהם המשתתפים',
+  trialScreenTitle: 'פרטי התחרות',
+  trialScreenHint: 'יודפסו בכל דף שיפוט. רק הרמה היא חובה.',
+  decoyLabel: n => `דיקוי ${n}`,
+  decoySigLabel: 'חתימה',
+  toParticipantsBtn: 'המשך להוספת משתתפים',
+  trainingTitle: 'תרגול',
+  trainingLevelLabel: 'רמה לתרגול',
+  discardConfirmTitle: 'למחוק את התחרות הפתוחה?',
+  discardConfirmBody: 'כל הניקוד של התחרות הזו יימחק. אי אפשר לבטל את הפעולה.',
+  discardConfirmOk: 'כן, למחוק',
   alertSelectLevel: 'יש לבחור רמת תחרות.',
 
   back: 'חזרה',

@@ -1,5 +1,5 @@
 import type { Level, Participant, ResultStatus, ScoreMap } from '../types'
-import type { TrialDetails } from '../data/session'
+import { decoyEntries, type TrialDetails } from '../data/session'
 import { useLang } from '../i18n/LangContext'
 import { buildSheetData } from './sheetData'
 import { SHEET_COL_LABELS, SHEET_PARTIAL, type Maxima } from './sheetRows'
@@ -184,14 +184,16 @@ export default function ReportSheet({ level, details, page }: Props) {
       </div>
 
       <div className="a4-block a4-signatures">
-        <div className="a4-sig-row">
-          <span className="a4-side-label">Decoys / דיקויים</span>
-          <span className="a4-sig-name">{details.decoys || ''}</span>
-          <span className="a4-sig-label">Signature / חתימה</span>
-          <span className="a4-sig-box">
-            {details.decoysSignature && <img src={details.decoysSignature} alt="" />}
-          </span>
-        </div>
+        {(decoyEntries(details).length ? decoyEntries(details) : [{ name: '' }]).map((d, i) => (
+          <div className="a4-sig-row" key={i}>
+            <span className="a4-side-label">{i === 0 ? 'Decoys / דיקויים' : ''}</span>
+            <span className="a4-sig-name">{d.name}</span>
+            <span className="a4-sig-label">Signature / חתימה</span>
+            <span className="a4-sig-box">
+              {d.signature && <img src={d.signature} alt="" />}
+            </span>
+          </div>
+        ))}
         <div className="a4-sig-row">
           <span className="a4-side-label">Judge / שופט</span>
           <span className="a4-sig-name">{details.judge || ''}</span>

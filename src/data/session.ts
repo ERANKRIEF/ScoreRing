@@ -6,10 +6,27 @@ export interface TrialDetails {
   location?: string
   club?: string
   judge?: string
+  /** Older saves kept the decoys as one line; new ones name up to three */
   decoys?: string
+  decoyList?: DecoyEntry[]
   /** Finger-drawn signatures as PNG data URLs, collected before the trial */
   judgeSignature?: string
   decoysSignature?: string
+}
+
+export interface DecoyEntry {
+  name: string
+  signature?: string
+}
+
+export const DECOY_SLOTS = 3
+
+/** The decoys as the sheet prints them: named entries first, else the old single line */
+export function decoyEntries(d: TrialDetails): DecoyEntry[] {
+  const named = (d.decoyList ?? []).filter(e => e.name.trim() || e.signature)
+  if (named.length) return named
+  if (d.decoys?.trim()) return [{ name: d.decoys.trim(), signature: d.decoysSignature }]
+  return []
 }
 
 /** Everything needed to put a half-scored trial back on screen */
