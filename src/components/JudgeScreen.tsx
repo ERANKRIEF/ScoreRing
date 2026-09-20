@@ -298,6 +298,19 @@ export default function JudgeScreen(props: Props) {
         }
       </div>
 
+      {/* The same navigation again under the penalties, so a long list needs no scroll back up */}
+      <div className="exercise-nav exercise-nav--bottom">
+        <button className="ex-nav-btn" onClick={() => navigateEx(-1)} disabled={currentExIndex === 0}>
+          {t.prevBtn}
+        </button>
+        <span className="ex-nav-pos">{currentExIndex + 1} / {exercises.length}</span>
+        {isLastEx ? (
+          <button className="ex-nav-btn ex-nav-btn--finish" onClick={onShowSheet}>{t.toSheetBtn}</button>
+        ) : (
+          <button className="ex-nav-btn" onClick={() => navigateEx(1)}>{t.nextBtn}</button>
+        )}
+      </div>
+
       {/* ── Absent or eliminated ends this competitor's run ── */}
       {confirmStatus && (
         <div className="modal-overlay open" onClick={() => setConfirmStatus(null)}>

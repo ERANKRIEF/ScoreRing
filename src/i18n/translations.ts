@@ -20,6 +20,9 @@ export interface Translations {
   competitionLevel: string
   addParticipantsBtn: string
   startJudgingBtn: string
+  newOverOpenTitle: string
+  newOverOpenBody: string
+  newOverOpenOk: string
   startJudgingHint: string
   trialScreenTitle: string
   trialScreenHint: string
@@ -297,6 +300,9 @@ const en: Translations = {
   competitionLevel: 'Competition Level',
   addParticipantsBtn: 'Add Participants →',
   startJudgingBtn: 'Start Judging',
+  newOverOpenTitle: 'A trial is still open',
+  newOverOpenBody: 'Starting a new trial discards the open one and its scores. Use "Carry on judging" to keep it.',
+  newOverOpenOk: 'Discard and start new',
   startJudgingHint: 'Trial details, then the competitors',
   trialScreenTitle: 'Trial details',
   trialScreenHint: 'Printed on every scoresheet. Only the level is required.',
@@ -810,6 +816,9 @@ const fr: Translations = {
   competitionLevel: 'Niveau de Compétition',
   addParticipantsBtn: 'Ajouter des Participants →',
   startJudgingBtn: 'Commencer le jugement',
+  newOverOpenTitle: 'Un concours est encore ouvert',
+  newOverOpenBody: 'Un nouveau concours effacera celui qui est ouvert et ses notes. Utilisez « Continuer » pour le garder.',
+  newOverOpenOk: 'Effacer et commencer',
   startJudgingHint: 'Détails du concours, puis les concurrents',
   trialScreenTitle: 'Détails du concours',
   trialScreenHint: 'Imprimés sur chaque feuille de notes. Seul le niveau est obligatoire.',
@@ -1323,6 +1332,9 @@ const he: Translations = {
   competitionLevel: 'רמת תחרות',
   addParticipantsBtn: 'הוספת משתתפים',
   startJudgingBtn: 'תחילת שיפוט',
+  newOverOpenTitle: 'יש תחרות שעדיין פתוחה',
+  newOverOpenBody: 'פתיחת תחרות חדשה תמחק את התחרות הפתוחה ואת הניקוד שלה. כדי לשמור אותה, לחץ על "המשך בשיפוט".',
+  newOverOpenOk: 'למחוק ולפתוח חדשה',
   startJudgingHint: 'פרטי התחרות, ואחריהם המשתתפים',
   trialScreenTitle: 'פרטי התחרות',
   trialScreenHint: 'יודפסו בכל דף שיפוט. רק הרמה היא חובה.',

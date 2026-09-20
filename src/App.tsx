@@ -231,6 +231,12 @@ function AppInner() {
     handleRestart()
   }
 
+  // ── Home → new trial: always from a clean slate ────────────
+  function handleStartNew() {
+    handleRestart()
+    setScreen('trial')
+  }
+
   // ── Results → restart ─────────────────────────────────────
   function handleRestart() {
     clearTrial()
@@ -244,6 +250,7 @@ function AppInner() {
     setRemarks({})
     setReport(null)
     setEditingId(null)
+    setResumable(null)
   }
 
   // ── Render ────────────────────────────────────────────────
@@ -253,7 +260,7 @@ function AppInner() {
         resumable={resumable}
         onResume={resume}
         onDiscardSaved={discardSaved}
-        onStart={() => setScreen('trial')}
+        onStart={handleStartNew}
         onPractice={lvl => { setLevel(lvl); setScreen('practice') }}
         onQuiz={lvl => { setLevel(lvl); setScreen('quiz') }}
       />

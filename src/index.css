@@ -2294,3 +2294,7 @@ button {
 @media (max-width: 380px) {
   .decoy-row { grid-template-columns: 1fr; }
 }
+
+/* ── Judge: second prev/next under the penalty list ── */
+.exercise-nav--bottom { border-bottom: 0; border-top: 1px solid var(--border); margin-top: 8px; }
+.ex-nav-pos { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }

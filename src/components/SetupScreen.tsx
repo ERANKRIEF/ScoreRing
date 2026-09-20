@@ -25,6 +25,7 @@ export default function SetupScreen(props: Props) {
   const { t, lang, setLang } = useLang()
   const [trainLevel, setTrainLevel] = useState<Level | null>(null)
   const [confirmDiscard, setConfirmDiscard] = useState(false)
+  const [confirmNew, setConfirmNew] = useState(false)
 
   function withLevel(run: (l: Level) => void) {
     if (!trainLevel) { alert(t.alertSelectLevel); return }
@@ -69,7 +70,7 @@ export default function SetupScreen(props: Props) {
         </div>
       )}
 
-      <button className="start-btn start-judging-btn" onClick={onStart}>
+      <button className="start-btn start-judging-btn" onClick={() => (resumable ? setConfirmNew(true) : onStart())}>
         {t.startJudgingBtn}
         <span>{t.startJudgingHint}</span>
       </button>
@@ -103,6 +104,21 @@ export default function SetupScreen(props: Props) {
       </div>
 
       <div className="app-version">v{__APP_VERSION__}</div>
+
+      {confirmNew && (
+        <div className="modal-overlay open" onClick={() => setConfirmNew(false)}>
+          <div className="modal-sheet" onClick={e => e.stopPropagation()}>
+            <div className="modal-title">{t.newOverOpenTitle}</div>
+            <div className="modal-desc">{t.newOverOpenBody}</div>
+            <div className="confirm-actions">
+              <button className="modal-cancel-btn" onClick={() => setConfirmNew(false)}>{t.confirmCancel}</button>
+              <button className="modal-apply-btn disq" onClick={() => { setConfirmNew(false); onStart() }}>
+                {t.newOverOpenOk}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {confirmDiscard && (
         <div className="modal-overlay open" onClick={() => setConfirmDiscard(false)}>
