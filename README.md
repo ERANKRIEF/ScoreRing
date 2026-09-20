@@ -33,15 +33,9 @@ npm run build    # production build into dist/
 
 ## Deploying
 
-The build is a static site — any static host serves it.
-
-- **Netlify**: connect the repository (`netlify.toml` is already here), or drag
-  the contents of `dist/` onto a site's Deploys tab.
-- **GitHub Pages**: the workflow in `.github/workflows/deploy.yml` builds on a
-  push to `main` and sets the base path from the repository name. Enable Pages
-  with "GitHub Actions" as the source.
-- **Anywhere else**: upload `dist/`. Set `VITE_BASE_PATH` at build time if the
-  app is served from a subdirectory.
+Deployment is Netlify only. A push to `main` is the release: Netlify builds
+the site (`netlify.toml` holds the settings) and publishes it automatically.
+Nothing else needs to run.
 
 ## Layout
 
